@@ -47,8 +47,7 @@ public class FilmController {
         if (films.containsKey(film.getId())) {
             validFilm(film);
             films.put(film.getId(), film);
-        }
-        else {
+        } else {
             log.warn("Попытка изменить фильм по не существующему id");
             throw new ValidationException("Фильма с таким id не существует, обновление невозможно");
         }
@@ -62,8 +61,7 @@ public class FilmController {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
             log.warn("Попытка создания фильма с пустым названием");
             throw new ValidationException("Название фильма не может быть пустым");
-        } else
-            if (film.getDescription().length() > 200) {
+        } else if (film.getDescription().length() > 200) {
             log.warn("Попытка создания фильма с описанием свыше 200 знаков");
             throw new ValidationException("Описание фильма превышает максимальное количество знаков 200");
         } else if (film.getReleaseDate().isBefore(firstFilmBirthday)) {

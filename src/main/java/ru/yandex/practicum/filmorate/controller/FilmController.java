@@ -28,7 +28,7 @@ public class FilmController {
     @PostMapping
     public Film create(@RequestBody @Valid Film film) {
         if (films.containsKey(film.getId())) {
-            log.debug("Попытка создать фильм с уже существующим id");
+            log.warn("Попытка создать фильм с уже существующим id");
             throw new ValidationException("Фильм с таким id уже существует");
         }
 
@@ -49,7 +49,7 @@ public class FilmController {
             films.put(film.getId(), film);
         }
         else {
-            log.debug("Попытка изменить фильм по не существующему id");
+            log.warn("Попытка изменить фильм по не существующему id");
             throw new ValidationException("Фильма с таким id не существует, обновление невозможно");
         }
 
@@ -60,17 +60,17 @@ public class FilmController {
 
     private void validFilm(Film film) {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
-            log.debug("Попытка создания фильма с пустым названием");
+            log.warn("Попытка создания фильма с пустым названием");
             throw new ValidationException("Название фильма не может быть пустым");
         } else
             if (film.getDescription().length() > 200) {
-            log.debug("Попытка создания фильма с описанием свыше 200 знаков");
+            log.warn("Попытка создания фильма с описанием свыше 200 знаков");
             throw new ValidationException("Описание фильма превышает максимальное количество знаков 200");
         } else if (film.getReleaseDate().isBefore(firstFilmBirthday)) {
-            log.debug("Попытка создания фильма с датой, предшествующей появлению первого фильма");
+            log.warn("Попытка создания фильма с датой, предшествующей появлению первого фильма");
             throw new ValidationException("Дата релиза фильма введена неверна");
         } else if (film.getDuration() <= 0) {
-            log.debug("Попытка создания фильма с отрицательной продолжительностью");
+            log.warn("Попытка создания фильма с отрицательной продолжительностью");
             throw new ValidationException("Продолжительность фильма не может быть отрицательной");
         }
     }

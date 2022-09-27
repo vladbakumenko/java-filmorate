@@ -26,7 +26,7 @@ public class UserController {
     @PostMapping
     public User create(@RequestBody @Valid User user) {
         if (users.containsKey(user.getId())) {
-            log.debug("Попытка создать пользователя с уже существующим id");
+            log.warn("Попытка создать пользователя с уже существующим id");
             throw new ValidationException("Пользователь с таким id уже существует");
         }
         validUser(user);
@@ -46,7 +46,7 @@ public class UserController {
             users.put(user.getId(), user);
             log.debug("Пользователь изменён: {}", user);
         } else {
-            log.debug("Попытка изменить пользователя с не существующим id");
+            log.warn("Попытка изменить пользователя с не существующим id");
             throw new ValidationException("Пользователь с таким id ещё не создан");
         }
 
@@ -58,19 +58,19 @@ public class UserController {
 
         if (user.getEmail() == null || user.getEmail().isEmpty() || user.getEmail().isBlank()
                 || !user.getEmail().contains("@")) {
-            log.debug("Попытка создать пользователя с пустым или не корректным адресом email");
+            log.warn("Попытка создать пользователя с пустым или не корректным адресом email");
             throw new ValidationException("Адрес почты введён неверно");
         } else if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank()
                 || user.getLogin().contains(" ")) {
-            log.debug("Попытка создать пользователя с пустым или содержащим пробелы логином");
+            log.warn("Попытка создать пользователя с пустым или содержащим пробелы логином");
             throw new ValidationException("Логин не должен быть пустым и содержать пробелы");
         } else if (user.getBirthday().isAfter(now)) {
-            log.debug("Попытка создать пользователя с датой рождения из будущего");
+            log.warn("Попытка создать пользователя с датой рождения из будущего");
             throw new ValidationException("День рождения не может быть из будущего :)");
         }
 
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-            log.debug("Попытка создать пользователя с пустым именем, вместо имени будет присвоен логин");
+            log.warn("Попытка создать пользователя с пустым именем, вместо имени будет присвоен логин");
             user.setName(user.getLogin());
         }
     }

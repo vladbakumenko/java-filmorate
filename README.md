@@ -8,12 +8,12 @@ examples of basic database queries:
 <br>SELECT *
 <br>FROM films
 
-- get film by id (parametr int id):
+- get film by id (parametr: int id):
 <br>SELECT *
 <br>FROM films AS f
 <br>WHERE f.id = (entered id)
 
-- get popular film (parametr int count):
+- get popular film (parametr: int count):
 <br>SELECT *
 <br>FROM films AS f
 <br>LEFT OUTER JOIN likes_by_users AS l ON f.id = l.id_film
@@ -25,15 +25,30 @@ examples of basic database queries:
 <br>SELECT *
 <br>FROM users
 
-- get user by id (parametr int id):
+- get user by id (parametr: int id):
 <br>SELECT *
 <br>FROM users AS u
 <br>WHERE u.id = (entered id)
 
-- get friends by id (parametr int id):
+- get friends by id (parametr: int id):
 <br>SELECT *
 <br>FROM users AS u
-<br>LEFT OUTER JOIN friends AS f ON u.id = f.id_user
-<br>WHERE f.id_friend = (entered id)
-<br>AND f.id_status = 2 (подтверждённая дружба)
+<br>WHERE u.id IN (SELECT id_friend
+       <br>FROM friends AS f
+       <br>WHERE f.id_user = (entered id)
+       <br>AND f.id_status = 2 (подтверждённая дружба))
+       
+- get common friends by id user and id other user (parameters: int id, int otherId)
+<br>SELECT *
+<br>FROM users AS u
+<br>WHERE u.id IN (SELECT id_friend
+       <br>FROM friends AS f
+       <br>WHERE f.id_user = (entered id)
+       <br>AND f.id_status = 2 (подтверждённая дружба))
+<br>AND u.id IN (SELECT id_friend
+       <br>FROM friends AS f
+       <br>WHERE f.id_user = (entered otherId)
+       <br>AND f.id_status = 2 (подтверждённая дружба))
+       
+
 

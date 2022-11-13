@@ -11,7 +11,6 @@ public class GenreService {
 
     private final GenreDao genreDao;
 
-
     public GenreService(GenreDao genreDao) {
         this.genreDao = genreDao;
     }

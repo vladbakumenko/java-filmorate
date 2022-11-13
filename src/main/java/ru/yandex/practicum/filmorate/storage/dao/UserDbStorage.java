@@ -89,7 +89,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    private User makeUser(ResultSet rs) throws SQLException {
+    public User makeUser(ResultSet rs) throws SQLException {
         return User.builder()
                 .id(rs.getInt("id"))
                 .email(rs.getString("email"))

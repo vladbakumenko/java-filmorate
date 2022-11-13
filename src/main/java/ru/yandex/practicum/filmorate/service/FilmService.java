@@ -21,9 +21,9 @@ public class FilmService {
 
     private final LocalDate firstFilmBirthday = LocalDate.of(1895, Month.DECEMBER, 28);
 
-    private FilmStorage filmStorage;
-    private UserStorage userStorage;
-    private LikesDao likesDao;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private final LikesDao likesDao;
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("userDbStorage") UserStorage userStorage, LikesDao likesDao) {

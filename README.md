@@ -1,8 +1,8 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-![This is an image of database](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate%20db.png)
-link for [image of db](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate%20db.png)
+![This is an image of database](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate_db.png)
+link for [image of db](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate_db.png)
 
 examples of basic database queries:
 - get all films:

@@ -47,40 +47,6 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
     }
 
-//    @Override
-//    public Film create(Film film) {
-//        String sql = "insert into films(name, description, releaseDate, duration, mpa)" +
-//                " values (?, ?, ?, ?, ?)";
-//
-//        KeyHolder keyHolder = new GeneratedKeyHolder();
-//        jdbcTemplate.update(connection -> {
-//            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"});
-//            stmt.setString(1, film.getName());
-//            stmt.setString(2, film.getDescription());
-//            stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
-//            stmt.setInt(4, film.getDuration());
-//            stmt.setInt(5, film.getMpa().getId());
-//            return stmt;
-//        }, keyHolder);
-//
-//        int id = Objects.requireNonNull(keyHolder.getKey()).intValue();
-//        film.setId(id);
-//
-//        film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
-//
-//        if (!CollectionUtils.isEmpty(film.getGenres())) {
-//            String sql2 = "insert into film_genres(id_film, id_genre) values (?, ?)";
-//
-//            for (Genre genre : film.getGenres()) {
-//                jdbcTemplate.update(sql2, film.getId(), genre.getId());
-//            }
-//        }
-//
-//        film.setGenres(getGenresByFilmId(film.getId()));
-//
-//        return film;
-//    }
-
     @Override
     public Film create(Film film) {
         String sql = "insert into films(name, description, releaseDate, duration, mpa)" +

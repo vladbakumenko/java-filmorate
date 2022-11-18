@@ -49,12 +49,6 @@ public class FriendsDao {
         userStorage.checkUserExist(id);
         userStorage.checkUserExist(otherId);
 
-//        String sql = "select id_friend from friends where id_user = ? and id_friend in " +
-//                "(select id_friend from friends where id_user = ?)";
-
-//        String sql2 = "select * from users u join friends f on u.id = f.id_friend join friends o on u.id = f.id_friend " +
-//                "where f.id_user = ? and o.id_user = ? and f.id_friend = o.id_friend";
-
         String sql = "select * from users u, friends f, friends o where u.id = f.id_friend and u.id = o.id_friend " +
                 "and f.id_user = ? and o.id_user = ?";
 

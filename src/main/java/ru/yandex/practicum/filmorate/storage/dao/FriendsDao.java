@@ -12,9 +12,9 @@ import java.util.Collection;
 public class FriendsDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private final UserDbStorage userStorage;
+    private final UsersDao userStorage;
 
-    public FriendsDao(JdbcTemplate jdbcTemplate, UserDbStorage userStorage) {
+    public FriendsDao(JdbcTemplate jdbcTemplate, UsersDao userStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.userStorage = userStorage;
     }

@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmoRateApplicationTests {
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmStorage;
+    private final UsersDao userStorage;
+    private final FilmsDao filmStorage;
     private final FriendsDao friendsDao;
     private final GenreDao genreDao;
     private final LikesDao likesDao;

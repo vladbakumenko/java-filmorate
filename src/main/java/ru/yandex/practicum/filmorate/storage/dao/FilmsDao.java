@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class FilmDbStorage implements FilmStorage {
+public class FilmsDao implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final MPAService mpaService;
     private final GenreService genreService;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, MPAService mpaService, GenreService genreService) {
+    public FilmsDao(JdbcTemplate jdbcTemplate, MPAService mpaService, GenreService genreService) {
         this.jdbcTemplate = jdbcTemplate;
         this.mpaService = mpaService;
         this.genreService = genreService;

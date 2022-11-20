@@ -21,5 +21,4 @@ public class Film {
     private int duration;
     private MPA mpa;
     private List<Genre> genres;
-    private Set<Integer> likesByUsers;
 }

@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.dao.FriendsDao;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -20,7 +19,7 @@ public class UserService {
     private final FriendsDao friendsDao;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendsDao friendsDao) {
+    public UserService(@Qualifier("usersDao") UserStorage userStorage, FriendsDao friendsDao) {
         this.userStorage = userStorage;
         this.friendsDao = friendsDao;
     }
@@ -65,47 +64,16 @@ public class UserService {
         return userStorage.getById(id);
     }
 
-    public void addFriend(Integer id, Integer friendId) {
-        User user = userStorage.getById(id);
-        User friend = userStorage.getById(friendId);
-
-        user.getFriends().add(friendId);
-        friend.getFriends().add(id);
-    }
-
     public void addFriendForDb(Integer id, Integer friendId) {
         friendsDao.addFriend(id, friendId);
-    }
-
-    public void removeFriend(Integer id, Integer friendId) {
-        User user = userStorage.getById(id);
-        User friend = userStorage.getById(friendId);
-
-        if (user.getFriends().contains(friendId) && friend.getFriends().contains(id)) {
-            user.getFriends().remove(friendId);
-            friend.getFriends().remove(id);
-        }
     }
 
     public void removeFriendFromDb(Integer id, Integer friendId) {
         friendsDao.removeFriend(id, friendId);
     }
 
-    public Collection<User> getFriends(Integer id) {
-        User user = userStorage.getById(id);
-        return user.getFriends().stream().map(integer -> userStorage.getById(integer)).collect(Collectors.toList());
-    }
-
     public Collection<User> getFriendsFromDb(Integer id) {
         return friendsDao.getFriends(id);
-    }
-
-    public Collection<User> getCommonFriends(Integer id, Integer otherId) {
-        User user = userStorage.getById(id);
-        User otherUser = userStorage.getById(otherId);
-
-        return user.getFriends().stream().filter(i -> otherUser.getFriends().contains(i))
-                .map(i -> userStorage.getById(i)).collect(Collectors.toList());
     }
 
     public Collection<User> getCommonFriendsFromDb(Integer id, Integer otherId) {

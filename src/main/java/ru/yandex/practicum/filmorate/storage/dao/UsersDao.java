@@ -19,11 +19,11 @@ import java.util.Objects;
 
 @Component
 @Slf4j
-public class UserDbStorage implements UserStorage {
+public class UsersDao implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+    public UsersDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

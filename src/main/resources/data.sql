@@ -1,13 +1,18 @@
 DELETE FROM likes_by_users;
 DELETE FROM film_genres;
 DELETE FROM friends;
+DELETE FROM film_directors;
+DELETE FROM feed;
+DELETE FROM reviews;
 DELETE FROM films;
 DELETE FROM users;
+DELETE FROM directors;
 DELETE FROM genres;
 DELETE FROM mpa;
 
 ALTER TABLE films ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE users ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE reviews ALTER COLUMN id RESTART WITH 1;
 
 INSERT INTO genres(id, name) VALUES (1, 'Комедия');
 INSERT INTO genres(id, name) VALUES (2, 'Драма');

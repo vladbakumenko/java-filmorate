@@ -1,21 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.service.GenreService;
-import ru.yandex.practicum.filmorate.service.MPAService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +9,30 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
+
+import com.google.common.collect.Lists;
+
+import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.service.DirectorService;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.MPAService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
 @Slf4j
 @Component
 public class FilmsDao implements FilmStorage {
@@ -32,12 +40,14 @@ public class FilmsDao implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MPAService mpaService;
     private final GenreService genreService;
+    private final DirectorService directorService;
 
-    public FilmsDao(JdbcTemplate jdbcTemplate, MPAService mpaService, GenreService genreService) {
+    public FilmsDao(JdbcTemplate jdbcTemplate, MPAService mpaService, GenreService genreService,
+                    DirectorService directorService) {
         this.jdbcTemplate = jdbcTemplate;
         this.mpaService = mpaService;
         this.genreService = genreService;
-
+        this.directorService = directorService;
     }
 
     @Override
@@ -68,7 +78,7 @@ public class FilmsDao implements FilmStorage {
 
         film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
 
-        if (!CollectionUtils.isEmpty(film.getGenres())) {
+        if (!isEmpty(film.getGenres())) {
             List<List<Genre>> batchLists = Lists.partition(film.getGenres(), 1);
 
             String sql2 = "insert into film_genres(id_film, id_genre) values (?, ?)";
@@ -92,6 +102,11 @@ public class FilmsDao implements FilmStorage {
 
         film.setGenres(getGenresByFilmId(film.getId()));
 
+        if (!isEmpty(film.getDirectors())) {
+            setFilmDirectors(film);
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
+
         return film;
     }
 
@@ -109,7 +124,7 @@ public class FilmsDao implements FilmStorage {
             String sql2 = "delete from film_genres where id_film = ?";
             jdbcTemplate.update(sql2, film.getId());
 
-            if (!CollectionUtils.isEmpty(film.getGenres())) {
+            if (!isEmpty(film.getGenres())) {
                 String sql3 = "insert into film_genres(id_genre, id_film) values (?, ?)";
 
                 for (int id : film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet())) {
@@ -120,6 +135,13 @@ public class FilmsDao implements FilmStorage {
 
         film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
         film.setGenres(getGenresByFilmId(film.getId()));
+
+        deleteFilmDirectors(film);
+
+        if (!isEmpty(film.getDirectors())) {
+            setFilmDirectors(film);
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
 
         return film;
     }
@@ -135,11 +157,60 @@ public class FilmsDao implements FilmStorage {
         }
     }
 
+    @Override
+    public List<Film> getSorted(Integer directorId, String param) {
+        String sqlQuery = "";
+
+        if (param.equals("year")) {
+            sqlQuery = "select * from films f "
+                    + "where f.id in (select film_id from film_directors where director_id = ?) "
+                    + "order by EXTRACT(YEAR FROM releasedate) asc";
+        } else if (param.equals("likes")) {
+            sqlQuery = "select * from "
+                    + "(select * from films f where f.id in (select film_id from film_directors where director_id = ?)) "
+                    + "left join (select id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) L "
+                    + "order by likes_count asc";
+        } else throw new ValidationException("Incorrect parameters value");
+
+        directorService.getById(directorId);
+
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
+                .stream()
+                .map(film -> getById(film.getId()))
+                .collect(toList());
+    }
+
     private List<Genre> getGenresByFilmId(int filmId) {
         String sql = "select id_genre from film_genres where id_film = ?";
         List<Integer> genresId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("id_genre"), filmId);
 
-        return genresId.stream().map(genreService::getGenreById).collect(Collectors.toList());
+        return genresId.stream().map(genreService::getGenreById).collect(toList());
+    }
+
+    private List<Director> getDirectorsByFilmId(int filmId) {
+        String sql = "select director_id from film_directors where film_id = ?";
+        List<Integer> directorsId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("director_id"), filmId);
+
+        return directorsId.stream().map(directorService::getById).collect(toList());
+    }
+
+    private void setFilmDirectors(Film film) {
+        String sqlQuery = "insert into film_directors (film_id, director_id) values (?, ?)";
+
+        film.getDirectors()
+                .forEach(director ->
+                        jdbcTemplate.update(connection -> {
+                            PreparedStatement stmt = connection.prepareStatement(sqlQuery);
+                            stmt.setLong(1, film.getId());
+                            stmt.setInt(2, director.getId());
+                            return stmt;
+                        }));
+    }
+
+    private void deleteFilmDirectors(Film film) {
+        String sqlQuery = "delete from film_directors where film_id = ?";
+
+        jdbcTemplate.update(sqlQuery, film.getId());
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
@@ -151,6 +222,7 @@ public class FilmsDao implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(mpaService.getMpaById(rs.getInt("mpa")))
                 .genres(getGenresByFilmId(rs.getInt("id")))
+                .directors(getDirectorsByFilmId(rs.getInt("id")))
                 .build();
     }
 }

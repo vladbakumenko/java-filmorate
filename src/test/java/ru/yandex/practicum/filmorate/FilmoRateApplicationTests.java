@@ -1,33 +1,45 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Collection;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dao.*;
-
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.Collection;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.dao.FilmsDao;
+import ru.yandex.practicum.filmorate.storage.dao.FriendsDao;
+import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
+import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
+import ru.yandex.practicum.filmorate.storage.dao.MPADao;
+import ru.yandex.practicum.filmorate.storage.dao.UsersDao;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmoRateApplicationTests {
+    private final DirectorStorage directorStorage;
     private final UsersDao userStorage;
     private final FilmsDao filmStorage;
     private final FriendsDao friendsDao;
@@ -37,11 +49,13 @@ public class FilmoRateApplicationTests {
     private final JdbcTemplate jdbcTemplate;
     private User user;
     private Film film;
+    private Director director;
 
     @BeforeEach
     public void addDataAndRestartDb() {
         jdbcTemplate.update("DELETE FROM likes_by_users");
         jdbcTemplate.update("DELETE FROM film_genres");
+        jdbcTemplate.update("DELETE FROM film_directors");
         jdbcTemplate.update("DELETE FROM friends");
         jdbcTemplate.update("DELETE FROM films");
         jdbcTemplate.update("DELETE FROM users");
@@ -58,6 +72,12 @@ public class FilmoRateApplicationTests {
 
         userStorage.create(user);
 
+        director = Director.builder()
+                .name("Director")
+                .build();
+
+        director = directorStorage.create(director);
+
         film = Film.builder()
                 .name("film")
                 .description("description")
@@ -65,6 +85,7 @@ public class FilmoRateApplicationTests {
                 .duration(100)
                 .mpa(new MPA(1, null, null))
                 .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
                 .build();
 
         filmStorage.create(film);
@@ -198,6 +219,7 @@ public class FilmoRateApplicationTests {
                 .duration(200)
                 .mpa(new MPA(1, null, null))
                 .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
                 .build();
 
         filmStorage.create(testFilm);
@@ -217,6 +239,7 @@ public class FilmoRateApplicationTests {
                 .duration(200)
                 .mpa(new MPA(1, null, null))
                 .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
                 .build();
 
         filmStorage.create(testFilm);
@@ -236,6 +259,7 @@ public class FilmoRateApplicationTests {
                 .duration(200)
                 .mpa(new MPA(1, null, null))
                 .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
                 .build();
 
         filmStorage.update(testFilm);
@@ -377,7 +401,7 @@ public class FilmoRateApplicationTests {
         likesDao.addLike(film.getId(), user.getId());
 
         Boolean bool = jdbcTemplate.queryForObject("select exists " +
-                "(select * from likes_by_users where id_film = ? and id_user = ?)",
+                        "(select * from likes_by_users where id_film = ? and id_user = ?)",
                 Boolean.class, film.getId(), user.getId());
 
         assertTrue(bool);
@@ -404,6 +428,7 @@ public class FilmoRateApplicationTests {
                 .duration(200)
                 .mpa(new MPA(1, null, null))
                 .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
                 .build();
 
         filmStorage.create(testFilm);
@@ -415,6 +440,7 @@ public class FilmoRateApplicationTests {
                 .duration(300)
                 .mpa(new MPA(2, null, null))
                 .genres(List.of(new Genre(2, null)))
+                .directors(List.of(director))
                 .build();
 
         filmStorage.create(testFilm2);

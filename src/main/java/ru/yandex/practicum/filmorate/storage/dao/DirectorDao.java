@@ -32,14 +32,14 @@ public class DirectorDao implements DirectorStorage {
 
     @Override
     public Collection<Director> findAll() {
-        String sql = "select id, name from directors";
+        String sql = "select * from directors";
 
         return jdbcTemplate.query(sql, directorMapper);
     }
 
     @Override
     public Director getById(Integer id) {
-        String sql = "select id, name from directors where id = ?";
+        String sql = "select * from directors where id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sql, directorMapper, id);

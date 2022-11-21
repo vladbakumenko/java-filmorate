@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
-@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
@@ -68,7 +66,7 @@ public class FilmController {
 
     @GetMapping("director/{directorId}")
     public Collection<Film> getFilmsByDirector(@PathVariable Integer directorId,
-                                               @RequestParam(required = false) String sortBy) {
+                                               @RequestParam String sortBy) {
         return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }

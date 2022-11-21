@@ -14,21 +14,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
-@Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/directors")
 public class DirectorController {
 
     private final DirectorService directorService;
-
-    @Autowired
-    public DirectorController(DirectorService directorService) {
-        this.directorService = directorService;
-    }
 
     @GetMapping
     public Collection<Director> findAll() {

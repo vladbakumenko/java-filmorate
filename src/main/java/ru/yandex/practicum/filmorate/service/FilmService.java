@@ -77,4 +77,8 @@ public class FilmService {
     public Collection<Film> getPopularFromDb(Integer count) {
         return likesDao.getPopular(count);
     }
+
+    public Collection<Film> searchFromDb(String query, String groupBy) {
+        return filmStorage.searchFilms(query, groupBy);
+    }
 }

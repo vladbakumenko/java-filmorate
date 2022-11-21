@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
@@ -133,6 +134,29 @@ public class FilmsDao implements FilmStorage {
         } catch (DataAccessException e) {
             throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
         }
+    }
+
+    @Override
+    public Collection<Film> searchFilms(String query, String groupBy) {
+        String sql = "";
+        switch (groupBy) {
+            case "title":
+                sql = "select * from films as f where locate(?, name) > 0";
+                break;
+            /*case "director": //TODO: переделать/проверить работаспособность после merge
+                sql = "select * from films as f, film_directors as fd, directors as d " +
+                        "where f.id = fd.film_id and fd.director_id = d.id and locate(?, d.name) > 0";
+                break;
+            case "director,title":
+            case "title,director":
+                sql = "select * from films as f, film_directors as fd, directors as d " +
+                "where (f.id = fd.film_id and fd.director_id = d.id and locate(?, d.name) > 0) or locate(?, name) > 0";
+                break;*/
+            default:
+                throw new ValidationException("Incorrect parameters value");
+        }
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query);
     }
 
     private List<Genre> getGenresByFilmId(int filmId) {

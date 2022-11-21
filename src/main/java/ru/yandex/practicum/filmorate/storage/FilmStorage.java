@@ -12,4 +12,6 @@ public interface FilmStorage {
     Film update(Film film);
 
     Film getById(Integer id);
+
+    Collection<Film> searchFilms(String query, String groupBy);
 }

@@ -5,8 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.FeedDao;
 import ru.yandex.practicum.filmorate.storage.dao.FriendsDao;
 
 import java.time.LocalDate;
@@ -17,11 +21,13 @@ import java.util.Collection;
 public class UserService {
     private final UserStorage userStorage;
     private final FriendsDao friendsDao;
+    private final FeedService feedService;
 
     @Autowired
-    public UserService(@Qualifier("usersDao") UserStorage userStorage, FriendsDao friendsDao) {
+    public UserService(UserStorage userStorage, FriendsDao friendsDao, FeedService feedService) {
         this.userStorage = userStorage;
         this.friendsDao = friendsDao;
+        this.feedService = feedService;
     }
 
     private void validUser(User user) {
@@ -66,10 +72,14 @@ public class UserService {
 
     public void addFriendForDb(Integer id, Integer friendId) {
         friendsDao.addFriend(id, friendId);
+
+        feedService.addFeed(friendId, id, EventType.FRIEND, Operation.ADD);
     }
 
     public void removeFriendFromDb(Integer id, Integer friendId) {
         friendsDao.removeFriend(id, friendId);
+
+        feedService.addFeed(friendId, id, EventType.FRIEND, Operation.REMOVE);
     }
 
     public Collection<User> getFriendsFromDb(Integer id) {

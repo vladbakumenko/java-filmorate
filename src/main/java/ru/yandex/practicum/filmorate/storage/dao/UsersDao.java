@@ -84,7 +84,7 @@ public class UsersDao implements UserStorage {
 
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
 
-        if (!exists) {
+        if (Boolean.FALSE.equals(exists)) {
             throw new UserNotFoundException(String.format("User with id: %d not found in DB", id));
         }
     }

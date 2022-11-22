@@ -8,9 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -65,5 +63,29 @@ public class LikesDao {
         sortedFilmsByLikes.addAll(filmsWithoutLikes);
 
         return sortedFilmsByLikes;
+    }
+
+    private Integer getUsersWithMaximumIntersectionLikes (Integer idUser) {
+        String sql = "SELECT l2.id_user AS recommended" +
+                "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
+                "   ON l1.id_film = l2.id_film " +
+                "   WHERE l1.id_user = ? AND l1.id_user <> l2.id_user" +
+                "   GROUP BY l1.id_user, l2.id_user" +
+                "   ORDER BY COUNT(*) DESC LIMIT 1";
+        return jdbcTemplate.queryForObject(
+                sql, Integer.class , idUser);
+    }
+
+    public Collection<Film> getRecommendedFilm(Integer idUser) {
+        Integer recommendedUserId = getUsersWithMaximumIntersectionLikes (idUser);
+        String sql2 = "SELECT * FROM films AS f " +
+                "JOIN mpa AS m ON f.mpa = m.id " +
+                "WHERE f.id IN (" +
+                "    SELECT id_film" +
+                "    FROM likes_by_users" +
+                "    WHERE id_user = ?" +
+                "AND id_film NOT IN (SELECT id_film FROM likes_by_users WHERE id_user = ?))";
+        return new ArrayList<>(jdbcTemplate.query(sql2,
+                (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), recommendedUserId, idUser));
     }
 }

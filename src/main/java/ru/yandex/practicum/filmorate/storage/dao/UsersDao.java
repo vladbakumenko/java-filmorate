@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -84,8 +85,18 @@ public class UsersDao implements UserStorage {
 
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
 
-        if (!exists) {
+        if (Boolean.FALSE.equals(exists)) {
             throw new UserNotFoundException(String.format("User with id: %d not found in DB", id));
+        }
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM users where id = ?";
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (DataAccessException e) {
+            throw new FilmNotFoundException(String.format("User with id: %d not found", id));
         }
     }
 

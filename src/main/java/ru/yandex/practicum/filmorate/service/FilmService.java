@@ -1,18 +1,18 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
-import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
-
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 @Slf4j
 @Service
@@ -21,13 +21,11 @@ public class FilmService {
     private final LocalDate firstFilmBirthday = LocalDate.of(1895, Month.DECEMBER, 28);
 
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
     private final LikesDao likesDao;
 
     @Autowired
-    public FilmService(@Qualifier("filmsDao") FilmStorage filmStorage, @Qualifier("usersDao") UserStorage userStorage, LikesDao likesDao) {
+    public FilmService(@Qualifier("filmsDao") FilmStorage filmStorage, LikesDao likesDao) {
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
         this.likesDao = likesDao;
     }
 
@@ -76,5 +74,9 @@ public class FilmService {
 
     public Collection<Film> getPopularFromDb(Integer count) {
         return likesDao.getPopular(count);
+    }
+
+    public Collection<Film> getFilmsByDirector(Integer directorId, String sortParam) {
+        return filmStorage.getSorted(directorId, sortParam);
     }
 }

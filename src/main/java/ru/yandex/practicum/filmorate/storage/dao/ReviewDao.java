@@ -60,8 +60,6 @@ public class ReviewDao implements ReviewStorage {
         jdbcTemplate.update(sql, review.getContent(),
                 review.getIsPositive(),
                 review.getReviewId());
-        System.out.println("я присвоил id " + review.getReviewId() + " при обновлении");
-
         return review;
     }
 

@@ -25,13 +25,11 @@ public class ReviewService {
 
     public Review create(Review review) {
         validReview(review);
-        System.out.println("Ну и почему мы продолжаем");
         return reviewDao.create(review);
     }
 
     public Review update(Review review) {
         validReview(review);
-        System.out.println("Ну и почему мы продолжаем");
         return reviewDao.update(review);
     }
 

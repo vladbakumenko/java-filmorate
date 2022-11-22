@@ -13,7 +13,7 @@ public class Feed {
     private long idEvent;
     private int idEntity;
     private int idUser;
-    private Instant timestamp;
+    private long timestamp;
     private EventType eventType;
     private Operation operation;
 }

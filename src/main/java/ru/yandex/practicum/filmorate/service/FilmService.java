@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
@@ -21,6 +23,7 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final LikesDao likesDao;
+    private final FeedService feedService;
 
     private void validFilm(Film film) {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
@@ -59,10 +62,14 @@ public class FilmService {
 
     public void addLikeForDb(Integer id, Integer userId) {
         likesDao.addLike(id, userId);
+
+        feedService.addFeed(id, userId, EventType.LIKE, Operation.ADD);
     }
 
     public void removeLikeFromDb(Integer id, Integer userId) {
         likesDao.removeLike(id, userId);
+
+        feedService.addFeed(id, userId, EventType.LIKE, Operation.REMOVE);
     }
 
     public Collection<Film> getPopularFromDb(Integer count) {

@@ -26,18 +26,18 @@ public class FeedDao {
     public Collection<Feed> getFeedByUserId(int id) {
         usersDao.checkUserExist(id);
 
-        String sql = "select * from feed where id_user = ? order by timestamp desc";
+        String sql = "select * from feed where id_user = ? order by timestamp asc";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFeed(rs), id);
     }
 
     public void addFeed(int idEntity, int idUser, EventType eventType, Operation operation) {
-        Instant timestamp = Instant.now();
+        long timestamp = Instant.now().toEpochMilli();
 
         String sql = "insert into feed(id_entity, id_user, timestamp, event_type, operation) " +
                 "values (?, ?, ?, ?, ?)";
 
-        jdbcTemplate.update(sql, idEntity, idUser, Timestamp.from(timestamp),
+        jdbcTemplate.update(sql, idEntity, idUser, timestamp,
                 eventType.toString(), operation.toString());
     }
 
@@ -46,7 +46,7 @@ public class FeedDao {
                 .idEvent(rs.getLong("id_event"))
                 .idEntity(rs.getInt("id_entity"))
                 .idUser(rs.getInt("id_user"))
-                .timestamp(rs.getTimestamp("timestamp").toInstant())
+                .timestamp(rs.getLong("timestamp"))
                 .eventType(EventType.valueOf(rs.getString("event_type")))
                 .operation(Operation.valueOf(rs.getString("operation")))
                 .build();

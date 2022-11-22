@@ -96,7 +96,7 @@ public class UsersDao implements UserStorage {
         try {
             jdbcTemplate.update(sql, id);
         } catch (DataAccessException e) {
-            throw new FilmNotFoundException(String.format("User with id: %d not found", id));
+            throw new UserNotFoundException(String.format("User with id: %d not found", id));
         }
     }
 

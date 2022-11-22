@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -459,7 +460,14 @@ public class FilmoRateApplicationTests {
 
         likesDao.addLike(testFilm.getId(), user.getId());
 
-        assertEquals(likesDao.getPopular(10), List.of(film, testFilm, testFilm2));
+        assertEquals(likesDao.getPopular(10, Optional.empty(), Optional.empty()),
+                List.of(film, testFilm, testFilm2));
+        assertEquals(likesDao.getPopular(10, Optional.of(1), Optional.of(2010)),
+                List.of(film, testFilm));
+        assertEquals(likesDao.getPopular(10, Optional.of(2), Optional.of(2010)),
+                List.of(testFilm2));
+        assertEquals(likesDao.getPopular(10, Optional.empty(), Optional.of(2010)),
+                List.of(film, testFilm, testFilm2));
     }
 
     @Test
@@ -483,5 +491,4 @@ public class FilmoRateApplicationTests {
     public void testGetAllMpa() {
         assertEquals(mpaDao.findAll().size(), 5);
     }
-
 }

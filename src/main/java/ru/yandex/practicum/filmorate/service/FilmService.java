@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
@@ -16,20 +14,13 @@ import java.util.Collection;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService {
 
     private final LocalDate firstFilmBirthday = LocalDate.of(1895, Month.DECEMBER, 28);
 
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
     private final LikesDao likesDao;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage, LikesDao likesDao) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-        this.likesDao = likesDao;
-    }
 
     private void validFilm(Film film) {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
@@ -76,5 +67,9 @@ public class FilmService {
 
     public Collection<Film> getPopularFromDb(Integer count) {
         return likesDao.getPopular(count);
+    }
+
+    public Collection<Film> getFilmsByDirector(Integer directorId, String sortParam) {
+        return filmStorage.getSorted(directorId, sortParam);
     }
 }

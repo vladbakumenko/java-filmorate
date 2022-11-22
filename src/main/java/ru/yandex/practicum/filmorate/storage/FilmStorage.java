@@ -7,6 +7,8 @@ import java.util.Collection;
 public interface FilmStorage {
     Collection<Film> findAll();
 
+    Collection<Film> getSorted(Integer directorId, String sortParam);
+
     Film create(Film film);
 
     Film update(Film film);

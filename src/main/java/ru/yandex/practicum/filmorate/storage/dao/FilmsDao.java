@@ -183,25 +183,24 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public Collection<Film> searchFilms(String query, String groupBy) {
-        String sql = "";
+        String sql;
         switch (groupBy) {
             case "title":
                 sql = "select * from films as f where locate(?, name) > 0";
-                break;
-            case "director": //TODO: переделать/проверить работаспособность после merge
+                Collection<Film> aaa = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query);
+                return aaa;
+            case "director":
                 sql = "select * from films as f, film_directors as fd, directors as d " +
                         "where f.id = fd.film_id and fd.director_id = d.id and locate(?, d.name) > 0";
-                break;
+                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query);
             case "director,title":
             case "title,director":
                 sql = "select * from films as f, film_directors as fd, directors as d " +
-                "where (f.id = fd.film_id and fd.director_id = d.id and locate(?, d.name) > 0) or locate(?, name) > 0";
-                break;
+                "where (f.id = fd.film_id and fd.director_id = d.id and locate(?, d.name) > 0) or locate(?, f.name) > 0";
+                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query, query);
             default:
                 throw new ValidationException("Incorrect parameters value");
         }
-
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query);
     }
 
     private List<Genre> getGenresByFilmId(int filmId) {

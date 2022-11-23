@@ -31,4 +31,5 @@ public class ErrorHandler {
     public Map<String, String> handleThrowable(final Throwable e) {
         return Map.of("error", e.getMessage());
     }
+
 }

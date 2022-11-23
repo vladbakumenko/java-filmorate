@@ -29,15 +29,15 @@ public class UsersDao implements UserStorage {
 
     @Override
     public Collection<User> findAll() {
-        String sql = "select * from users";
+        String sql = "SELECT * FROM users";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs));
     }
 
     @Override
     public User create(User user) {
-        String sql = "insert into users(email, login, name, birthday) " +
-                "values (?, ?, ?, ?)";
+        String sql = "INSERT INTO users(email, login, name, birthday) " +
+                "VALUES (?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -59,7 +59,7 @@ public class UsersDao implements UserStorage {
     public User update(User user) {
         checkUserExist(user.getId());
 
-        String sql = "update users set email = ?, login = ?, name = ?, birthday = ? where id = ?";
+        String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
 
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(),
                 user.getBirthday(), user.getId());
@@ -69,7 +69,7 @@ public class UsersDao implements UserStorage {
 
     @Override
     public User getById(Integer id) {
-        String sql = "select * from users where id = ?";
+        String sql = "SELECT * FROM users WHERE id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeUser(rs), id);
@@ -80,7 +80,7 @@ public class UsersDao implements UserStorage {
 
     @Override
     public void checkUserExist(Integer id) {
-        String sql = "select exists (select * from users where id = ?)";
+        String sql = "SELECT exists (SELECT * FROM users WHERE id = ?)";
 
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
 
@@ -108,4 +108,5 @@ public class UsersDao implements UserStorage {
                 .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
     }
+
 }

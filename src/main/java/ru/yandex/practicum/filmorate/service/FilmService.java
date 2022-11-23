@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 @Slf4j
@@ -83,5 +82,9 @@ public class FilmService {
 
     public Collection<Film> searchFromDb(String query, String groupBy) {
         return filmStorage.searchFilms(query, groupBy);
+    }
+
+    public void deleteById(Integer id) {
+        filmStorage.deleteById(id);
     }
 }

@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -100,12 +101,15 @@ public class UsersDao implements UserStorage {
     }
 
     public User makeUser(ResultSet rs) throws SQLException {
+        LocalDate birthday =
+                rs.getDate("birthday") == null ?
+                        null : rs.getDate("birthday").toLocalDate();
         return User.builder()
                 .id(rs.getInt("id"))
                 .email(rs.getString("email"))
                 .login(rs.getString("login"))
                 .name(rs.getString("name"))
-                .birthday(rs.getDate("birthday").toLocalDate())
+                .birthday(birthday)
                 .build();
     }
 }

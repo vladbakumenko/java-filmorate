@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -247,11 +248,14 @@ public class FilmsDao implements FilmStorage {
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
+        LocalDate releaseDate =
+                rs.getDate("releaseDate") == null ?
+                        null : rs.getDate("releaseDate").toLocalDate();
         return Film.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .description(rs.getString("description"))
-                .releaseDate(rs.getDate("releaseDate").toLocalDate())
+                .releaseDate(releaseDate)
                 .duration(rs.getInt("duration"))
                 .mpa(mpaService.getMpaById(rs.getInt("mpa")))
                 .genres(getGenresByFilmId(rs.getInt("id")))

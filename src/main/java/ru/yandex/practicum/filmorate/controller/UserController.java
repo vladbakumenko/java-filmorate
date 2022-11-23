@@ -60,4 +60,5 @@ public class UserController {
     public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriendsFromDb(id, otherId);
     }
+
 }

@@ -18,7 +18,7 @@ public class GenreDao {
     }
 
     public Genre getGenreById(int idGenre) {
-        String sql = "select id, name from genres where id = ?";
+        String sql = "SELECT id, name FROM genres WHERE id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sql,
@@ -30,9 +30,10 @@ public class GenreDao {
     }
 
     public Collection<Genre> findAll() {
-        String sql = "select id, name from genres";
+        String sql = "SELECT id, name FROM genres";
 
         return jdbcTemplate.query(sql,
                 (rs, rowNum) -> new Genre(rs.getInt("id"), rs.getString("name")));
     }
+
 }

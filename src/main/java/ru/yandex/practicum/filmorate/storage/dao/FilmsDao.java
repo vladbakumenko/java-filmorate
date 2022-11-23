@@ -52,15 +52,15 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public Collection<Film> findAll() {
-        String sql = "select * from films";
+        String sql = "SELECT * FROM films";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
     }
 
     @Override
     public Film create(Film film) {
-        String sql = "insert into films(name, description, releaseDate, duration, mpa)" +
-                " values (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO films(name, description, releasedate, duration, mpa)" +
+                " VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -81,7 +81,7 @@ public class FilmsDao implements FilmStorage {
         if (!isEmpty(film.getGenres())) {
             List<List<Genre>> batchLists = Lists.partition(film.getGenres(), 1);
 
-            String sql2 = "insert into film_genres(id_film, id_genre) values (?, ?)";
+            String sql2 = "INSERT INTO film_genres(id_film, id_genre) VALUES (?, ?)";
 
             for (List<Genre> batch : batchLists) {
                 jdbcTemplate.batchUpdate(sql2, new BatchPreparedStatementSetter() {
@@ -114,18 +114,18 @@ public class FilmsDao implements FilmStorage {
     public Film update(Film film) {
         Film oldFilm = getById(film.getId());
 
-        String sql = "update films set name = ?, description = ?, releaseDate = ?, duration = ?," +
-                " mpa = ? where id = ?";
+        String sql = "UPDATE films SET name = ?, description = ?, releasedate = ?, duration = ?," +
+                " mpa = ? WHERE id = ?";
 
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()),
                 film.getDuration(), film.getMpa().getId(), film.getId());
 
         if (!Objects.equals(film.getGenres(), oldFilm.getGenres())) {
-            String sql2 = "delete from film_genres where id_film = ?";
+            String sql2 = "DELETE FROM film_genres WHERE id_film = ?";
             jdbcTemplate.update(sql2, film.getId());
 
             if (!isEmpty(film.getGenres())) {
-                String sql3 = "insert into film_genres(id_genre, id_film) values (?, ?)";
+                String sql3 = "INSERT INTO film_genres(id_genre, id_film) VALUES (?, ?)";
 
                 for (int id : film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet())) {
                     jdbcTemplate.update(sql3, id, film.getId());
@@ -148,7 +148,7 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public Film getById(Integer id) {
-        String sql = "select * from films where id = ?";
+        String sql = "SELECT * FROM films WHERE id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
@@ -162,14 +162,14 @@ public class FilmsDao implements FilmStorage {
         String sqlQuery = "";
 
         if (param.equals("year")) {
-            sqlQuery = "select * from films f "
-                    + "where f.id in (select film_id from film_directors where director_id = ?) "
-                    + "order by EXTRACT(YEAR FROM releasedate) asc";
+            sqlQuery = "SELECT * FROM films f "
+                    + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) "
+                    + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
         } else if (param.equals("likes")) {
-            sqlQuery = "select * from "
-                    + "(select * from films f where f.id in (select film_id from film_directors where director_id = ?)) "
-                    + "left join (select id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) L "
-                    + "order by likes_count asc";
+            sqlQuery = "SELECT * FROM "
+                    + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) "
+                    + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l "
+                    + "ORDER BY likes_count ASC";
         } else throw new ValidationException("Incorrect parameters value");
 
         directorService.getById(directorId);
@@ -181,21 +181,21 @@ public class FilmsDao implements FilmStorage {
     }
 
     private List<Genre> getGenresByFilmId(int filmId) {
-        String sql = "select id_genre from film_genres where id_film = ?";
+        String sql = "SELECT id_genre FROM film_genres WHERE id_film = ?";
         List<Integer> genresId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("id_genre"), filmId);
 
         return genresId.stream().map(genreService::getGenreById).collect(toList());
     }
 
     private List<Director> getDirectorsByFilmId(int filmId) {
-        String sql = "select director_id from film_directors where film_id = ?";
+        String sql = "SELECT director_id FROM film_directors WHERE film_id = ?";
         List<Integer> directorsId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("director_id"), filmId);
 
         return directorsId.stream().map(directorService::getById).collect(toList());
     }
 
     private void setFilmDirectors(Film film) {
-        String sqlQuery = "insert into film_directors (film_id, director_id) values (?, ?)";
+        String sqlQuery = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
 
         film.getDirectors()
                 .forEach(director ->
@@ -208,7 +208,7 @@ public class FilmsDao implements FilmStorage {
     }
 
     private void deleteFilmDirectors(Film film) {
-        String sqlQuery = "delete from film_directors where film_id = ?";
+        String sqlQuery = "DELETE FROM film_directors WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, film.getId());
     }
@@ -225,4 +225,5 @@ public class FilmsDao implements FilmStorage {
                 .directors(getDirectorsByFilmId(rs.getInt("id")))
                 .build();
     }
+
 }

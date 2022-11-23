@@ -190,15 +190,16 @@ public class FilmsDao implements FilmStorage {
             case "director":
                 sql = "select * from films as f, film_directors as fd, directors as d " +
                         "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
-                List<Film> a = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
                 return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
             case "director,title":
             case "title,director":
                 sql = "select * from films as f, film_directors as fd, directors as d " +
-                        "where (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0)";
-                List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
-                sql = "select * from films as f where locate(?, lower(name)) > 0";
-                ans.addAll(jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase()));
+                        "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
+                List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase(), query.toLowerCase());
+                HashSet<Film> uniqueList = new HashSet<>(ans);
+                ans = new ArrayList<>();
+                ans.addAll(uniqueList);
+                Collections.reverse(ans);
                 return ans;
             default:
                 throw new ValidationException("Incorrect parameters value");

@@ -586,6 +586,6 @@ public class FilmoRateApplicationTests {
                 .build();
         testFilm2 = filmStorage.create(testFilm2);
 
-        assertEquals(List.of(testFilm2, testFilm), filmStorage.searchFilms("search", "director,title"));
+        assertEquals(List.of(testFilm, testFilm2), filmStorage.searchFilms("search", "director,title"));
     }
 }

@@ -4,9 +4,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -182,22 +180,24 @@ public class FilmsDao implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> searchFilms(String query, String groupBy) {
+    public List<Film> searchFilms(String query, String groupBy) {
         String sql;
         switch (groupBy) {
             case "title":
-                sql = "select * from films as f where locate(?, name) > 0";
-                Collection<Film> aaa = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query);
-                return aaa;
+                sql = "select * from films as f where locate(?, lower(name)) > 0";
+                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
             case "director":
                 sql = "select * from films as f, film_directors as fd, directors as d " +
-                        "where f.id = fd.film_id and fd.director_id = d.id and locate(?, d.name) > 0";
-                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query);
+                        "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
+                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
             case "director,title":
             case "title,director":
                 sql = "select * from films as f, film_directors as fd, directors as d " +
-                "where (f.id = fd.film_id and fd.director_id = d.id and locate(?, d.name) > 0) or locate(?, f.name) > 0";
-                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query, query);
+                        "where (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0)";
+                List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
+                sql = "select * from films as f where locate(?, lower(name)) > 0";
+                ans.addAll(jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase()));
+                return ans;
             default:
                 throw new ValidationException("Incorrect parameters value");
         }
@@ -245,6 +245,7 @@ public class FilmsDao implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(mpaService.getMpaById(rs.getInt("mpa")))
                 .genres(getGenresByFilmId(rs.getInt("id")))
+                .directors(getDirectorsByFilmId(rs.getInt("id")))
                 .build();
     }
 }

@@ -79,7 +79,7 @@ public class FilmsDao implements FilmStorage {
         film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
 
         if (!isEmpty(film.getGenres())) {
-            List<List<Genre>> batchLists = Lists.partition(film.getGenres(), 1);
+            List<List<Genre>> batchLists = Lists.partition(film.getGenres(), film.getGenres().size());
 
             String sql2 = "insert into film_genres(id_film, id_genre) values (?, ?)";
 

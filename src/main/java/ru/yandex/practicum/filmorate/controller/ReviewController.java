@@ -1,21 +1,18 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
+import javax.validation.Valid;
 import java.util.List;
 
-@Component
 @RestController
 @RequestMapping("/reviews")
+@RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
-
-    public ReviewController(ReviewService reviewService) {
-        this.reviewService = reviewService;
-    }
 
     @GetMapping
     public List<Review> findAll(@RequestParam(required = false) Integer filmId, @RequestParam(required = false, defaultValue = "10") Integer count) {
@@ -23,12 +20,12 @@ public class ReviewController {
     }
 
     @PostMapping
-    public Review create(@RequestBody Review review) {
+    public Review create(@RequestBody @Valid Review review) {
         return reviewService.create(review);
     }
 
     @PutMapping
-    public Review update(@RequestBody Review review) {
+    public Review update(@RequestBody @Valid Review review) {
         return reviewService.update(review);
     }
 

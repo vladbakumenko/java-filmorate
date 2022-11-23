@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -17,19 +19,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ReviewDao implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    public ReviewDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final RowMapper<Review> reviewRowMapper;
 
     @Override
     public Review getById(Integer id) {
         String sql = "SELECT * FROM reviews WHERE id =?";
         try {
-        return jdbcTemplate.queryForObject(sql,
-                (rs, rowNum) -> makeReview(rs), id);
+            return jdbcTemplate.queryForObject(sql,
+                    reviewRowMapper, id);
         } catch (DataAccessException da) {
             throw new ObjectNotFoundException("Review with id: " + id + " not found");
         }
@@ -56,7 +56,7 @@ public class ReviewDao implements ReviewStorage {
     @Override
     public Review update(Review review) {
         String sql = "UPDATE reviews SET content = ?," +
-                "is_positive=? where id=?";
+                "is_positive=? WHERE id=?";
         jdbcTemplate.update(sql, review.getContent(),
                 review.getIsPositive(),
                 review.getReviewId());
@@ -73,14 +73,15 @@ public class ReviewDao implements ReviewStorage {
     public List<Review> findAll(Integer filmId, Integer count) {
         if (filmId != null) {
             String sql = "SELECT * FROM reviews WHERE id_film=? ORDER BY useful DESC ";
-            List<Review> reviews = jdbcTemplate.query(sql, (rs, rowNum) -> makeReview(rs), filmId).
+            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper /*(rs, rowNum) -> makeReview(rs)*/
+                            , filmId).
                     stream().
                     limit(count).
                     collect(Collectors.toList());
             return reviews;
         } else {
             String sql = "SELECT * FROM reviews ORDER BY useful DESC ";
-            List<Review> reviews = jdbcTemplate.query(sql, (rs, rowNum) -> makeReview(rs));
+            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper /*(rs, rowNum) -> makeReview(rs)*/);
             return reviews.stream().limit(count).collect(Collectors.toList());
         }
     }
@@ -112,17 +113,6 @@ public class ReviewDao implements ReviewStorage {
         jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "DISLIKE", "REMOVE");
         String sql1 = "UPDATE reviews SET useful=(useful+1) WHERE id=?";
         jdbcTemplate.update(sql1, reviewId);
-    }
-
-    private Review makeReview(ResultSet rs) throws SQLException {
-        return Review.builder().reviewId(rs.getInt("id")).
-                content(rs.getString("content")).
-                isPositive(rs.getBoolean("is_positive")).
-                userId(rs.getInt("id_user")).
-                filmId(rs.getInt("id_film")).
-                useful(rs.getInt("useful")).
-                build();
-
     }
 
 }

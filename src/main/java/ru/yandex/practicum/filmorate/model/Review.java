@@ -4,35 +4,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.*;
 
 @Data
 @Builder
 public class Review {
-    @Positive
+    @Min(0)
     private int reviewId;
     @NotBlank
     private String content;
     @JsonProperty("isPositive")
+    @NotNull
     private Boolean isPositive;
-    @Positive
     private Integer filmId;
-    @Positive
     private Integer userId;
     private int useful;
-
-    @Override
-    public String toString() {
-        return "Review{" +
-                "reviewId=" + reviewId +
-                ", content='" + content + '\'' +
-                ", isPositive=" + isPositive +
-                ", filmId=" + filmId +
-                ", userId=" + userId +
-                ", useful=" + useful +
-                '}';
-    }
 
 }

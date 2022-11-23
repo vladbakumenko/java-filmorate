@@ -24,12 +24,12 @@ public class ReviewService {
     }
 
     public Review create(Review review) {
-        validReview(review);
+        validateReview(review);
         return reviewDao.create(review);
     }
 
     public Review update(Review review) {
-        validReview(review);
+        validateReview(review);
         return reviewDao.update(review);
     }
 
@@ -59,14 +59,8 @@ public class ReviewService {
         return reviewDao.getById(id);
     }
 
-    public void validReview(Review review) {
-        if (review.getContent() == null || review.getContent().isEmpty() || review.getContent().isBlank()) {
-            log.warn("Попытка создания пустого отзыва");
-            throw new ValidationException("Отзыв не может быть пустым");
-        } else if (review.getIsPositive() == null) {
-            log.warn("Попытка создания бесполезного отзыва");
-            throw new ValidationException("Отзыв должен быть либо положительным либо негативным");
-        } else if (review.getFilmId() < 0 || review.getFilmId() == null) {
+    public void validateReview(Review review) {
+        if (review.getFilmId() < 0 || review.getFilmId() == null) {
             log.warn("Попытка добавить отзыв к несуществующему фильму");
             throw new FilmNotFoundException("Нельзя добавить отзыв к несуществующему фильму");
         } else if (review.getUserId() < 0||review.getUserId()==null) {

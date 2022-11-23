@@ -35,7 +35,7 @@ public class FilmService {
             throw new ValidationException("Название фильма не может быть пустым");
         } else if (film.getDescription().length() > 200) {
             log.warn("Попытка создания фильма с описанием свыше 200 знаков");
-            throw new RuntimeException("Описание фильма превышает максимальное количество знаков 200");
+            throw new ValidationException("Описание фильма превышает максимальное количество знаков 200");
         } else if (film.getReleaseDate().isBefore(firstFilmBirthday)) {
             log.warn("Попытка создания фильма с датой, предшествующей появлению первого фильма");
             throw new ValidationException("Дата релиза фильма введена неверна");

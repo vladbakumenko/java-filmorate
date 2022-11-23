@@ -63,7 +63,7 @@ public class ReviewService {
         if (review.getFilmId() < 0 || review.getFilmId() == null) {
             log.warn("Попытка добавить отзыв к несуществующему фильму");
             throw new FilmNotFoundException("Нельзя добавить отзыв к несуществующему фильму");
-        } else if (review.getUserId() < 0||review.getUserId()==null) {
+        } else if (review.getUserId() < 0 || review.getUserId() == null) {
             log.warn("Пользователя с таким id не существует");
             throw new UserNotFoundException("Несуществующий пользователь не может добавлять отзывы");
         }

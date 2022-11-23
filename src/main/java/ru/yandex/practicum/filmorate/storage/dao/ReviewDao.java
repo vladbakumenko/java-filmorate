@@ -87,32 +87,22 @@ public class ReviewDao implements ReviewStorage {
     }
 
     public void addLikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "LIKE", "ADD");
-        String sql1 = "UPDATE reviews SET useful=useful+1 WHERE id=?";
-        jdbcTemplate.update(sql1, reviewId);
-
+        String sql = "UPDATE reviews SET useful=useful+1 WHERE id=?";
+        jdbcTemplate.update(sql, reviewId);
     }
 
     public void addDislikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "DISLIKE", "ADD");
-        String sql1 = "UPDATE reviews SET useful=useful-1 WHERE id=?";
-        jdbcTemplate.update(sql1, reviewId);
+        String sql = "UPDATE reviews SET useful=useful-1 WHERE id=?";
+        jdbcTemplate.update(sql, reviewId);
     }
 
     public void removeLikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "LIKE", "REMOVE");
         String sql1 = "UPDATE reviews SET useful-=? WHERE id=?";
         jdbcTemplate.update(sql1, reviewId);
     }
 
     public void removeDislikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "DISLIKE", "REMOVE");
         String sql1 = "UPDATE reviews SET useful=(useful+1) WHERE id=?";
         jdbcTemplate.update(sql1, reviewId);
     }
-
 }

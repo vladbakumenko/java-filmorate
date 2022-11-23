@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +14,7 @@ import java.time.Instant;
 import java.util.Collection;
 
 @Component
-public class FeedDao {
+public class FeedDao implements FeedStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final UsersDao usersDao;
@@ -23,6 +24,7 @@ public class FeedDao {
         this.usersDao = usersDao;
     }
 
+    @Override
     public Collection<Feed> getFeedByUserId(int id) {
         usersDao.checkUserExist(id);
 
@@ -31,8 +33,8 @@ public class FeedDao {
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFeed(rs), id);
     }
 
-    public void addFeed(int idEntity, int idUser, EventType eventType, Operation operation) {
-        long timestamp = Instant.now().toEpochMilli();
+    @Override
+    public void addFeed(int idEntity, int idUser, long timestamp, EventType eventType, Operation operation) {
 
         String sql = "insert into feed(id_entity, id_user, timestamp, event_type, operation) " +
                 "values (?, ?, ?, ?, ?)";
@@ -43,9 +45,9 @@ public class FeedDao {
 
     private Feed makeFeed(ResultSet rs) throws SQLException {
         return Feed.builder()
-                .idEvent(rs.getLong("id_event"))
-                .idEntity(rs.getInt("id_entity"))
-                .idUser(rs.getInt("id_user"))
+                .eventId(rs.getLong("id_event"))
+                .entityId(rs.getInt("id_entity"))
+                .userId(rs.getInt("id_user"))
                 .timestamp(rs.getLong("timestamp"))
                 .eventType(EventType.valueOf(rs.getString("event_type")))
                 .operation(Operation.valueOf(rs.getString("operation")))

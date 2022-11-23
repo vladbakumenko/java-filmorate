@@ -10,9 +10,9 @@ import java.time.Instant;
 @Data
 @Builder
 public class Feed {
-    private long idEvent;
-    private int idEntity;
-    private int idUser;
+    private long eventId;
+    private int entityId;
+    private int userId;
     private long timestamp;
     private EventType eventType;
     private Operation operation;

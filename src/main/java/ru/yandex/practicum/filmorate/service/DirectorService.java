@@ -18,7 +18,6 @@ public class DirectorService {
         this.directorStorage = directorStorage;
     }
 
-
     public Collection<Director> findAll() {
         return directorStorage.findAll();
     }

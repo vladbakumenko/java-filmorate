@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FriendsDao;
+import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -17,11 +19,13 @@ import java.util.Collection;
 public class UserService {
     private final UserStorage userStorage;
     private final FriendsDao friendsDao;
+    private final LikesDao likesDao;
 
     @Autowired
-    public UserService(@Qualifier("usersDao") UserStorage userStorage, FriendsDao friendsDao) {
+    public UserService(@Qualifier("usersDao") UserStorage userStorage, FriendsDao friendsDao, LikesDao likesDao) {
         this.userStorage = userStorage;
         this.friendsDao = friendsDao;
+        this.likesDao = likesDao;
     }
 
     private void validUser(User user) {
@@ -82,5 +86,9 @@ public class UserService {
 
     public void deleteById(Integer id) {
         userStorage.deleteById(id);
+    }
+
+    public Collection<Film> getRecommendedFilm(Integer id) {
+        return likesDao.getRecommendedFilm(id);
     }
 }

@@ -23,7 +23,7 @@ public class FriendsDao {
         userStorage.checkUserExist(id);
         userStorage.checkUserExist(friendId);
 
-        String sql = "insert into friends(id_user, id_friend) values (?, ?)";
+        String sql = "INSERT INTO friends(id_user, id_friend) VALUES (?, ?)";
         jdbcTemplate.update(sql, id, friendId);
         log.info("Added friendship for user with id: {} from other user with id: {}", id, friendId);
     }
@@ -32,7 +32,7 @@ public class FriendsDao {
         userStorage.checkUserExist(id);
         userStorage.checkUserExist(idUser);
 
-        String sql = "delete from friends where id_user = ? and id_friend = ?";
+        String sql = "DELETE FROM friends WHERE id_user = ? AND id_friend = ?";
         jdbcTemplate.update(sql, id, idUser);
         log.info("Friendship of user with id: {} and other user with id: {} removed", id, idUser);
     }
@@ -40,7 +40,7 @@ public class FriendsDao {
     public Collection<User> getFriends(Integer id) {
         userStorage.checkUserExist(id);
 
-        String sql = "select * from users u, friends f where f.id_user = ? and u.id = f.id_friend";
+        String sql = "SELECT * FROM users u, friends f WHERE f.id_user = ? AND u.id = f.id_friend";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> userStorage.makeUser(rs), id);
     }
@@ -49,10 +49,11 @@ public class FriendsDao {
         userStorage.checkUserExist(id);
         userStorage.checkUserExist(otherId);
 
-        String sql = "select * from users u, friends f, friends o where u.id = f.id_friend and u.id = o.id_friend " +
-                "and f.id_user = ? and o.id_user = ?";
+        String sql = "SELECT * FROM users u, friends f, friends o WHERE u.id = f.id_friend AND u.id = o.id_friend " +
+                "AND f.id_user = ? AND o.id_user = ?";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> userStorage.makeUser(rs),
                 id, otherId);
     }
+
 }

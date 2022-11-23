@@ -190,6 +190,7 @@ public class FilmsDao implements FilmStorage {
             case "director":
                 sql = "select * from films as f, film_directors as fd, directors as d " +
                         "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
+                List<Film> a = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
                 return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
             case "director,title":
             case "title,director":

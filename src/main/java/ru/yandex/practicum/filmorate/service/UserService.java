@@ -80,4 +80,8 @@ public class UserService {
     public Collection<User> getCommonFriendsFromDb(Integer id, Integer otherId) {
         return friendsDao.getCommonFriends(id, otherId);
     }
+
+    public void deleteById(Integer id) {
+        userStorage.deleteById(id);
+    }
 }

@@ -213,6 +213,16 @@ public class FilmsDao implements FilmStorage {
         jdbcTemplate.update(sqlQuery, film.getId());
     }
 
+    @Override
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM films where id = ?";
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (DataAccessException e) {
+            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+        }
+    }
+
     private Film makeFilm(ResultSet rs) throws SQLException {
         return Film.builder()
                 .id(rs.getInt("id"))

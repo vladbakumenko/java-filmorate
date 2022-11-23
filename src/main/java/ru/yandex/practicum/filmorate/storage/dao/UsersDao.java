@@ -89,6 +89,16 @@ public class UsersDao implements UserStorage {
         }
     }
 
+    @Override
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM users where id = ?";
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (DataAccessException e) {
+            throw new UserNotFoundException(String.format("User with id: %d not found", id));
+        }
+    }
+
     public User makeUser(ResultSet rs) throws SQLException {
         return User.builder()
                 .id(rs.getInt("id"))

@@ -14,4 +14,6 @@ public interface UserStorage {
     User getById(Integer id);
 
     void checkUserExist(Integer id);
+
+    void deleteById(Integer id);
 }

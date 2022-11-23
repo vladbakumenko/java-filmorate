@@ -79,7 +79,7 @@ public class FilmsDao implements FilmStorage {
         film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
 
         if (!isEmpty(film.getGenres())) {
-            List<List<Genre>> batchLists = Lists.partition(film.getGenres(), 1);
+            List<List<Genre>> batchLists = Lists.partition(film.getGenres(), film.getGenres().size());
 
             String sql2 = "INSERT INTO film_genres(id_film, id_genre) VALUES (?, ?)";
 
@@ -211,6 +211,16 @@ public class FilmsDao implements FilmStorage {
         String sqlQuery = "DELETE FROM film_directors WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, film.getId());
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM films where id = ?";
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (DataAccessException e) {
+            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+        }
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {

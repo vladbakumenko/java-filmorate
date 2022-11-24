@@ -6,6 +6,7 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -66,5 +67,36 @@ public class LikesDao {
         }
 
         return stream.collect(toList());
+    }
+
+    private Integer getUsersWithMaximumIntersectionLikes (Integer idUser) {
+        String sql = "SELECT l2.id_user AS recommended" +
+                "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
+                "   ON l1.id_film = l2.id_film " +
+                "   WHERE l1.id_user = ? AND l1.id_user <> l2.id_user" +
+                "   GROUP BY l1.id_user, l2.id_user" +
+                "   ORDER BY COUNT(*) DESC LIMIT 1";
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, idUser);
+        } catch (EmptyResultDataAccessException e) {
+             log.debug("No record found in database for " + idUser, e);
+             return idUser;
+        }
+    }
+
+    public Collection<Film> getRecommendedFilm(Integer idUser) {
+        Integer recommendedUserId = getUsersWithMaximumIntersectionLikes(idUser);
+        String sql2 = "SELECT * FROM films AS f " +
+                "JOIN mpa AS m ON f.mpa = m.id " +
+                "WHERE f.id IN (" +
+                "    SELECT id_film FROM likes_by_users WHERE id_user = ? AND " +
+                "id_film NOT IN (SELECT id_film FROM likes_by_users WHERE id_user = ?))";
+        try {
+            return new ArrayList<>(jdbcTemplate.query(sql2,
+                    (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), recommendedUserId, idUser));
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("No record found in database for " + recommendedUserId, e);
+            return null;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,16 +19,11 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class DirectorDao implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Director> directorMapper;
-
-    public DirectorDao(JdbcTemplate jdbcTemplate, RowMapper<Director> directorMapper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.directorMapper = directorMapper;
-    }
 
     @Override
     public Collection<Director> findAll() {
@@ -85,5 +81,4 @@ public class DirectorDao implements DirectorStorage {
         String sql = "DELETE FROM directors WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
-
 }

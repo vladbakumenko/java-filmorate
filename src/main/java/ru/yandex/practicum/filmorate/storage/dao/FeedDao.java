@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
@@ -12,15 +14,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
+@RequiredArgsConstructor
 public class FeedDao implements FeedStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final UsersDao usersDao;
-
-    public FeedDao(JdbcTemplate jdbcTemplate, UsersDao usersDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.usersDao = usersDao;
-    }
+    private final FeedMapper feedMapper;
 
     @Override
     public Collection<Feed> getFeedByUserId(int id) {
@@ -28,7 +27,7 @@ public class FeedDao implements FeedStorage {
 
         String sql = "select * from feed where id_user = ? order by timestamp asc";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFeed(rs), id);
+        return jdbcTemplate.query(sql, feedMapper, id);
     }
 
     @Override
@@ -39,16 +38,5 @@ public class FeedDao implements FeedStorage {
 
         jdbcTemplate.update(sql, idEntity, idUser, timestamp,
                 eventType.toString(), operation.toString());
-    }
-
-    private Feed makeFeed(ResultSet rs) throws SQLException {
-        return Feed.builder()
-                .eventId(rs.getLong("id_event"))
-                .entityId(rs.getInt("id_entity"))
-                .userId(rs.getInt("id_user"))
-                .timestamp(rs.getLong("timestamp"))
-                .eventType(EventType.valueOf(rs.getString("event_type")))
-                .operation(Operation.valueOf(rs.getString("operation")))
-                .build();
     }
 }

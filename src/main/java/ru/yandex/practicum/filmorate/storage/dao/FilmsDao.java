@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -32,20 +33,13 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class FilmsDao implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final MPAService mpaService;
     private final GenreService genreService;
     private final DirectorService directorService;
-
-    public FilmsDao(JdbcTemplate jdbcTemplate, MPAService mpaService, GenreService genreService,
-                    DirectorService directorService) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.mpaService = mpaService;
-        this.genreService = genreService;
-        this.directorService = directorService;
-    }
 
     @Override
     public Collection<Film> findAll() {
@@ -261,5 +255,4 @@ public class FilmsDao implements FilmStorage {
                 .directors(getDirectorsByFilmId(rs.getInt("id")))
                 .build();
     }
-
 }

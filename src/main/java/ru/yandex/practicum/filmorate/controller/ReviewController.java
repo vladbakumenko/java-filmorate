@@ -59,5 +59,4 @@ public class ReviewController {
     public void removeReviewById(@PathVariable("id") Integer id) {
         reviewService.delete(id);
     }
-
 }

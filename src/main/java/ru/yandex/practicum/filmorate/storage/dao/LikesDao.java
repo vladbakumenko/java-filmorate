@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -17,18 +18,12 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class LikesDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-
-    @Autowired
-    public LikesDao(JdbcTemplate jdbcTemplate, FilmStorage filmStorage, UserStorage userStorage) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
 
     public void addLike(Integer idFilm, Integer idUser) {
         filmStorage.getById(idFilm);

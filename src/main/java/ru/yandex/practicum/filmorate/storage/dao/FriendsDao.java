@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -9,15 +10,11 @@ import java.util.Collection;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class FriendsDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final UsersDao userStorage;
-
-    public FriendsDao(JdbcTemplate jdbcTemplate, UsersDao userStorage) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.userStorage = userStorage;
-    }
 
     public void addFriend(Integer id, Integer friendId) {
         userStorage.checkUserExist(id);
@@ -55,5 +52,4 @@ public class FriendsDao {
         return jdbcTemplate.query(sql, (rs, rowNum) -> userStorage.makeUser(rs),
                 id, otherId);
     }
-
 }

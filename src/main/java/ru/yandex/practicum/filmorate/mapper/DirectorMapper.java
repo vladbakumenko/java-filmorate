@@ -17,5 +17,4 @@ public class DirectorMapper implements RowMapper<Director> {
                 .name(rs.getString("NAME"))
                 .build();
     }
-
 }

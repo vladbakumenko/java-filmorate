@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -9,13 +10,10 @@ import ru.yandex.practicum.filmorate.model.MPA;
 import java.util.Collection;
 
 @Component
+@RequiredArgsConstructor
 public class MPADao {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public MPADao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public MPA getMpaById(int idMPA) {
         String sql = "select id, name, description from mpa where id = ?";

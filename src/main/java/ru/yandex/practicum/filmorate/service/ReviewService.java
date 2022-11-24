@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
@@ -13,14 +14,10 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ReviewService {
     private final ReviewDao reviewDao;
     private final FeedService feedService;
-
-    public ReviewService(ReviewDao reviewDao, FeedService feedService) {
-        this.reviewDao = reviewDao;
-        this.feedService = feedService;
-    }
 
     public List<Review> findAll(Integer filmId, Integer count) {
         return reviewDao.findAll(filmId, count);
@@ -79,7 +76,5 @@ public class ReviewService {
             log.warn("Пользователя с таким id не существует");
             throw new UserNotFoundException("Несуществующий пользователь не может добавлять отзывы");
         }
-
     }
-
 }

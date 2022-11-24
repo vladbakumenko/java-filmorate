@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,19 +15,15 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Objects;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class UsersDao implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UsersDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Collection<User> findAll() {
@@ -101,16 +98,12 @@ public class UsersDao implements UserStorage {
     }
 
     public User makeUser(ResultSet rs) throws SQLException {
-        LocalDate birthday =
-                rs.getDate("birthday") == null ?
-                        null : rs.getDate("birthday").toLocalDate();
         return User.builder()
                 .id(rs.getInt("id"))
                 .email(rs.getString("email"))
                 .login(rs.getString("login"))
                 .name(rs.getString("name"))
-                .birthday(birthday)
+                .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
     }
-
 }

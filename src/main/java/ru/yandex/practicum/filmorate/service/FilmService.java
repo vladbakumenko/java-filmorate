@@ -1,34 +1,30 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
+
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
-
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService {
 
     private final LocalDate firstFilmBirthday = LocalDate.of(1895, Month.DECEMBER, 28);
 
     private final FilmStorage filmStorage;
     private final LikesDao likesDao;
-
-    @Autowired
-    public FilmService(@Qualifier("filmsDao") FilmStorage filmStorage, LikesDao likesDao) {
-        this.filmStorage = filmStorage;
-        this.likesDao = likesDao;
-    }
+    private final FeedService feedService;
 
     private void validFilm(Film film) {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
@@ -67,10 +63,14 @@ public class FilmService {
 
     public void addLikeForDb(Integer id, Integer userId) {
         likesDao.addLike(id, userId);
+
+        feedService.addFeed(id, userId, EventType.LIKE, Operation.ADD);
     }
 
     public void removeLikeFromDb(Integer id, Integer userId) {
         likesDao.removeLike(id, userId);
+
+        feedService.addFeed(id, userId, EventType.LIKE, Operation.REMOVE);
     }
 
     public Collection<Film> getPopularFromDb(Integer count, Optional<Integer> genreId, Optional<Integer> year) {

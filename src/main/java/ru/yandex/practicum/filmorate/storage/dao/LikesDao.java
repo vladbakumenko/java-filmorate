@@ -1,34 +1,29 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
-
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class LikesDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-
-    @Autowired
-    public LikesDao(JdbcTemplate jdbcTemplate, FilmStorage filmStorage, UserStorage userStorage) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
 
     public void addLike(Integer idFilm, Integer idUser) {
         filmStorage.getById(idFilm);
@@ -69,7 +64,7 @@ public class LikesDao {
         return stream.collect(toList());
     }
 
-    private Integer getUsersWithMaximumIntersectionLikes (Integer idUser) {
+    private Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
         String sql = "SELECT l2.id_user AS recommended" +
                 "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
                 "   ON l1.id_film = l2.id_film " +
@@ -79,8 +74,8 @@ public class LikesDao {
         try {
             return jdbcTemplate.queryForObject(sql, Integer.class, idUser);
         } catch (EmptyResultDataAccessException e) {
-             log.debug("No record found in database for " + idUser, e);
-             return idUser;
+            log.debug("No record found in database for " + idUser, e);
+            return idUser;
         }
     }
 

@@ -1,23 +1,23 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewDao;
 
-import javax.validation.ValidationException;
 import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ReviewService {
     private final ReviewDao reviewDao;
-
-    public ReviewService(ReviewDao reviewDao) {
-        this.reviewDao = reviewDao;
-    }
+    private final FeedService feedService;
 
     public List<Review> findAll(Integer filmId, Integer count) {
         return reviewDao.findAll(filmId, count);
@@ -25,16 +25,25 @@ public class ReviewService {
 
     public Review create(Review review) {
         validateReview(review);
-        return reviewDao.create(review);
+
+        Review rw = reviewDao.create(review);
+        feedService.addFeed(rw.getReviewId(), rw.getUserId(), EventType.REVIEW, Operation.ADD);
+        return rw;
     }
 
     public Review update(Review review) {
         validateReview(review);
+
+        Review rw = reviewDao.getById(review.getReviewId());
+        feedService.addFeed(rw.getReviewId(), rw.getUserId(), EventType.REVIEW, Operation.UPDATE);
         return reviewDao.update(review);
     }
 
     public void delete(Integer id) {
+        Review rw = reviewDao.getById(id);
         reviewDao.removeReviewById(id);
+
+        feedService.addFeed(rw.getReviewId(), rw.getUserId(), EventType.REVIEW, Operation.REMOVE);
     }
 
     public void addLikeReview(Integer reviewId, Integer userId) {
@@ -67,7 +76,5 @@ public class ReviewService {
             log.warn("Пользователя с таким id не существует");
             throw new UserNotFoundException("Несуществующий пользователь не может добавлять отзывы");
         }
-
     }
-
 }

@@ -12,9 +12,6 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +53,7 @@ public class ReviewDao implements ReviewStorage {
     @Override
     public Review update(Review review) {
         String sql = "UPDATE reviews SET content = ?," +
-                "is_positive=? WHERE id=?";
+                "is_positive = ? WHERE id = ?";
         jdbcTemplate.update(sql, review.getContent(),
                 review.getIsPositive(),
                 review.getReviewId());
@@ -72,7 +69,7 @@ public class ReviewDao implements ReviewStorage {
     @Override
     public List<Review> findAll(Integer filmId, Integer count) {
         if (filmId != null) {
-            String sql = "SELECT * FROM reviews WHERE id_film=? ORDER BY useful DESC ";
+            String sql = "SELECT * FROM reviews WHERE id_film = ? ORDER BY useful DESC ";
             List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper /*(rs, rowNum) -> makeReview(rs)*/
                             , filmId).
                     stream().
@@ -87,32 +84,22 @@ public class ReviewDao implements ReviewStorage {
     }
 
     public void addLikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "LIKE", "ADD");
-        String sql1 = "UPDATE reviews SET useful=useful+1 WHERE id=?";
-        jdbcTemplate.update(sql1, reviewId);
-
+        String sql = "UPDATE reviews SET useful = useful + 1 WHERE id = ?";
+        jdbcTemplate.update(sql, reviewId);
     }
 
     public void addDislikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "DISLIKE", "ADD");
-        String sql1 = "UPDATE reviews SET useful=useful-1 WHERE id=?";
-        jdbcTemplate.update(sql1, reviewId);
+        String sql = "UPDATE reviews SET useful = useful-1 WHERE id = ?";
+        jdbcTemplate.update(sql, reviewId);
     }
 
     public void removeLikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "LIKE", "REMOVE");
-        String sql1 = "UPDATE reviews SET useful-=? WHERE id=?";
+        String sql1 = "UPDATE reviews SET useful -= ? WHERE id = ?";
         jdbcTemplate.update(sql1, reviewId);
     }
 
     public void removeDislikeReview(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed(id_entity,id_user,timestamp,event_type,operation) VALUES(?,?,?,?,?)";
-        jdbcTemplate.update(sql, reviewId, userId, LocalDate.now(), "DISLIKE", "REMOVE");
-        String sql1 = "UPDATE reviews SET useful=(useful+1) WHERE id=?";
+        String sql1 = "UPDATE reviews SET useful = (useful + 1) WHERE id = ?";
         jdbcTemplate.update(sql1, reviewId);
     }
-
 }

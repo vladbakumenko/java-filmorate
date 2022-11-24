@@ -14,5 +14,4 @@ public class MPA {
         this.name = name;
         this.description = description;
     }
-
 }

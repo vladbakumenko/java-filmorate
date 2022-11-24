@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,8 +73,8 @@ public class FilmService {
         likesDao.removeLike(id, userId);
     }
 
-    public Collection<Film> getPopularFromDb(Integer count) {
-        return likesDao.getPopular(count);
+    public Collection<Film> getPopularFromDb(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+        return likesDao.getPopular(count, genreId, year);
     }
 
     public Collection<Film> getFilmsByDirector(Integer directorId, String sortParam) {

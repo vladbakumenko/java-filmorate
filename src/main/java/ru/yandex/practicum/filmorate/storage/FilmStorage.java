@@ -15,5 +15,7 @@ public interface FilmStorage {
 
     Film getById(Integer id);
 
+    Collection<Film> searchFilms(String query, String groupBy);
+
     void deleteById(Integer id);
 }

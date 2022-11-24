@@ -491,4 +491,109 @@ public class FilmoRateApplicationTests {
     public void testGetAllMpa() {
         assertEquals(mpaDao.findAll().size(), 5);
     }
+
+
+    @Test
+    public void testSearchByTitle() {
+        Film testFilm = Film.builder()
+                .name("filmsEaRch")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
+                .build();
+
+        testFilm = filmStorage.create(testFilm);
+
+        assertEquals(List.of(testFilm), filmStorage.searchFilms("search", "title"));
+    }
+
+    @Test
+    public void testSearchByDirector() {
+        Director searchDirector = Director.builder()
+                .name("DirectorForSSSSSEaRCH")
+                .build();
+
+        searchDirector = directorStorage.create(searchDirector);
+        Film testFilm = Film.builder()
+                .name("filmForFind")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(searchDirector))
+                .build();
+        testFilm = filmStorage.create(testFilm);
+
+        assertEquals(List.of(testFilm), filmStorage.searchFilms("search", "director"));
+    }
+
+    @Test
+    public void testSearchByDirectorAndTitle() {
+        Film testFilm = Film.builder()
+                .name("filmsEaRch")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
+                .build();
+
+        testFilm = filmStorage.create(testFilm);
+
+        Director searchDirector = Director.builder()
+                .name("DirectorForSSSSSEaRCH")
+                .build();
+
+        searchDirector = directorStorage.create(searchDirector);
+        Film testFilm2 = Film.builder()
+                .name("filmForFind")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(searchDirector))
+                .build();
+        testFilm2 = filmStorage.create(testFilm2);
+
+        assertEquals(List.of(testFilm2, testFilm), filmStorage.searchFilms("search", "director,title"));
+    }
+
+    @Test
+    public void testSearchByDirectorAndTitleWithDuplicate() {
+        Film testFilm = Film.builder()
+                .name("filmsEaRch")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
+                .build();
+
+        testFilm = filmStorage.create(testFilm);
+
+        Director searchDirector = Director.builder()
+                .name("DirectorForSSSSSEaRCH")
+                .build();
+
+        searchDirector = directorStorage.create(searchDirector);
+        Film testFilm2 = Film.builder()
+                .name("filmForFindsearch")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(searchDirector))
+                .build();
+        testFilm2 = filmStorage.create(testFilm2);
+
+        assertEquals(List.of(testFilm2, testFilm), filmStorage.searchFilms("search", "director,title"));
+    }
 }

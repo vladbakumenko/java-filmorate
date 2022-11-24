@@ -32,14 +32,14 @@ public class DirectorDao implements DirectorStorage {
 
     @Override
     public Collection<Director> findAll() {
-        String sql = "select * from directors";
+        String sql = "SELECT * FROM directors";
 
         return jdbcTemplate.query(sql, directorMapper);
     }
 
     @Override
     public Director getById(Integer id) {
-        String sql = "select * from directors where id = ?";
+        String sql = "SELECT * FROM directors WHERE id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sql, directorMapper, id);
@@ -50,7 +50,7 @@ public class DirectorDao implements DirectorStorage {
 
     @Override
     public Director create(Director director) {
-        String sql = "insert into directors(name) values (?)";
+        String sql = "INSERT INTO directors(name) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -69,7 +69,7 @@ public class DirectorDao implements DirectorStorage {
     public Director update(Director director) {
         getById(director.getId());
 
-        String sql = "update directors set name = ? where id = ?";
+        String sql = "UPDATE directors SET name = ? WHERE id = ?";
 
         jdbcTemplate.update(sql, director.getName(), director.getId());
 
@@ -80,10 +80,11 @@ public class DirectorDao implements DirectorStorage {
     public void delete(Integer id) {
         getById(id);
 
-        String sqlQuery = "delete from film_directors where director_id = ?";
+        String sqlQuery = "DELETE FROM film_directors WHERE director_id = ?";
         jdbcTemplate.update(sqlQuery, id);
 
-        String sql = "delete from directors where id = ?";
+        String sql = "DELETE FROM directors WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
+
 }

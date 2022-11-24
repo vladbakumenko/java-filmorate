@@ -81,6 +81,10 @@ public class FilmService {
         return filmStorage.getSorted(directorId, sortParam);
     }
 
+    public Collection<Film> searchFromDb(String query, String groupBy) {
+        return filmStorage.searchFilms(query, groupBy);
+    }
+
     public void deleteById(Integer id) {
         filmStorage.deleteById(id);
     }

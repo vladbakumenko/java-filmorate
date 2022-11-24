@@ -4,9 +4,8 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -32,6 +31,7 @@ import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MPAService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
 
 @Slf4j
 @Component
@@ -180,6 +180,32 @@ public class FilmsDao implements FilmStorage {
                 .collect(toList());
     }
 
+    @Override
+    public List<Film> searchFilms(String query, String groupBy) {
+        String sql;
+        switch (groupBy) {
+            case "title":
+                sql = "select * from films as f where locate(?, lower(name)) > 0";
+                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
+            case "director":
+                sql = "select * from films as f, film_directors as fd, directors as d " +
+                        "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
+                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
+            case "director,title":
+            case "title,director":
+                sql = "select * from films as f, film_directors as fd, directors as d " +
+                        "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
+                List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase(), query.toLowerCase());
+                HashSet<Film> uniqueList = new HashSet<>(ans);
+                ans = new ArrayList<>();
+                ans.addAll(uniqueList);
+                Collections.reverse(ans);
+                return ans;
+            default:
+                throw new ValidationException("Incorrect parameters value");
+        }
+    }
+
     private List<Genre> getGenresByFilmId(int filmId) {
         String sql = "SELECT id_genre FROM film_genres WHERE id_film = ?";
         List<Integer> genresId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("id_genre"), filmId);
@@ -224,11 +250,14 @@ public class FilmsDao implements FilmStorage {
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
+        LocalDate releaseDate =
+                rs.getDate("releaseDate") == null ?
+                        null : rs.getDate("releaseDate").toLocalDate();
         return Film.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .description(rs.getString("description"))
-                .releaseDate(rs.getDate("releaseDate").toLocalDate())
+                .releaseDate(releaseDate)
                 .duration(rs.getInt("duration"))
                 .mpa(mpaService.getMpaById(rs.getInt("mpa")))
                 .genres(getGenresByFilmId(rs.getInt("id")))

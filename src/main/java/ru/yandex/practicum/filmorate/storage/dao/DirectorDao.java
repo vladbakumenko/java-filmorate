@@ -1,22 +1,21 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import java.sql.PreparedStatement;
-import java.util.Collection;
-
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+
+import java.sql.PreparedStatement;
+import java.util.Collection;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 @Component
 @Slf4j

@@ -101,15 +101,12 @@ public class UsersDao implements UserStorage {
     }
 
     public User makeUser(ResultSet rs) throws SQLException {
-        LocalDate birthday =
-                rs.getDate("birthday") == null ?
-                        null : rs.getDate("birthday").toLocalDate();
         return User.builder()
                 .id(rs.getInt("id"))
                 .email(rs.getString("email"))
                 .login(rs.getString("login"))
                 .name(rs.getString("name"))
-                .birthday(birthday)
+                .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
     }
 

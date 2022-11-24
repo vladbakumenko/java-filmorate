@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -46,8 +47,10 @@ public class FilmController {
     }
 
     @GetMapping("popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false) Integer count) {
-        return filmService.getPopularFromDb(count);
+    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false) Integer count,
+                                       @RequestParam(required = false) Optional<Integer> genreId,
+                                       @RequestParam(required = false) Optional<Integer> year) {
+        return filmService.getPopularFromDb(count, genreId, year);
     }
 
     @GetMapping("director/{directorId}")

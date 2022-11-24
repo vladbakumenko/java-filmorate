@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FriendsDao;
+import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -20,6 +22,7 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendsDao friendsDao;
     private final FeedService feedService;
+    private final LikesDao likesDao;
 
     private void validUser(User user) {
         LocalDate now = LocalDate.now();
@@ -83,5 +86,9 @@ public class UserService {
 
     public void deleteById(Integer id) {
         userStorage.deleteById(id);
+    }
+
+    public Collection<Film> getRecommendedFilm(Integer id) {
+        return likesDao.getRecommendedFilm(id);
     }
 }

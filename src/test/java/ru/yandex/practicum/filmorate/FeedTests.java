@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
@@ -17,7 +19,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -29,7 +31,8 @@ public class FeedTests {
     private final UserStorage userStorage;
 
     @Test
-    public void testAddFeedAndGetFeedByUserID() {
+    @Order(1)
+    public void testAddFeedAndGetFeedByUserId() {
         User user = User.builder()
                 .email("email@email.ru")
                 .login("login")
@@ -57,5 +60,29 @@ public class FeedTests {
         feed.setEventId(1);
 
         assertTrue(feedStorage.getFeedByUserId(1).contains(feed));
+    }
+
+    @Test
+    @Order(2)
+    public void testGetFeedByWrongId() {
+        UserNotFoundException e = assertThrows(UserNotFoundException.class, () -> {
+            feedStorage.getFeedByUserId(10);
+        });
+
+        assertEquals(e.getMessage(), "User with id: 10 not found in DB");
+    }
+
+    @Test
+    @Order(3)
+    public void testGetFeedByIdWithoutEvents() {
+        User user = User.builder()
+                .email("email2@email.ru")
+                .login("login2")
+                .name("name2")
+                .birthday(LocalDate.now().minusYears(100))
+                .build();
+        userStorage.create(user);
+
+        assertTrue(feedStorage.getFeedByUserId(2).isEmpty());
     }
 }

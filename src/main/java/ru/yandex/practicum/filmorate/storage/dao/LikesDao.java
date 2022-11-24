@@ -29,6 +29,8 @@ public class LikesDao {
         filmStorage.getById(idFilm);
         userStorage.checkUserExist(idUser);
 
+        removeLike(idFilm, idUser);
+
         String sql = "insert into likes_by_users(id_film, id_user) values (?, ?)";
         jdbcTemplate.update(sql, idFilm, idUser);
         log.info("Like added for film with id: {} from user with id: {}", idFilm, idUser);

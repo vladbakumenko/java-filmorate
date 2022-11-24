@@ -596,4 +596,70 @@ public class FilmoRateApplicationTests {
 
         assertEquals(List.of(testFilm2, testFilm), filmStorage.searchFilms("search", "director,title"));
     }
+
+    @Test
+    public void testGetCommonFilms() {
+        User user2 = User.builder()
+                .email("email2@email.ru")
+                .login("login2")
+                .name("name2")
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 10))
+                .build();
+
+        userStorage.create(user2);
+
+        User user3 = User.builder()
+                .email("email3@email.ru")
+                .login("login3")
+                .name("name3")
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 10))
+                .build();
+
+        userStorage.create(user3);
+
+        User user4 = User.builder()
+                .email("email4@email.ru")
+                .login("login4")
+                .name("name4")
+                .birthday(LocalDate.of(2000, Month.DECEMBER, 10))
+                .build();
+
+        userStorage.create(user4);
+
+        Film film2 = Film.builder()
+                .name("film2")
+                .description("description2")
+                .releaseDate(LocalDate.of(2010, Month.DECEMBER, 10))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
+                .build();
+
+        filmStorage.create(film2);
+
+        Film film3 = Film.builder()
+                .name("film3")
+                .description("description3")
+                .releaseDate(LocalDate.of(2010, Month.DECEMBER, 10))
+                .duration(100)
+                .mpa(new MPA(1, null, null))
+                .genres(List.of(new Genre(1, null)))
+                .directors(List.of(director))
+                .build();
+
+        filmStorage.create(film3);
+
+        likesDao.addLike(1, 1);
+        likesDao.addLike(1, 2);
+        likesDao.addLike(1, 3);
+        likesDao.addLike(1, 4);
+        likesDao.addLike(2, 1);
+        likesDao.addLike(2, 2);
+        likesDao.addLike(2, 3);
+        likesDao.addLike(3, 1);
+        likesDao.addLike(3, 2);
+
+        assertEquals(filmStorage.getCommonFilms(1, 2), List.of(film, film2, film3));
+    }
 }

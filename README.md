@@ -1,8 +1,18 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-![This is an image of database](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate_db.png)
-link for [image of db](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate_db.png)
+list of features for review:
+- add-director
+- add-common-films
+- add-feed
+- add-recommendations
+- add-most-populars
+- add-search
+- add-reviews
+- add-remove-endpoint
+
+![This is an image of database](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate-db.png)
+link for [image of db](https://github.com/vladbakumenko/java-filmorate/blob/main/filmorate-db.png)
 
 examples of basic database queries:
 - get all films:

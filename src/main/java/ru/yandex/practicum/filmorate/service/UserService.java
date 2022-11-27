@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -12,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 
 import static ru.yandex.practicum.filmorate.model.enums.EventType.FRIEND;
 import static ru.yandex.practicum.filmorate.model.enums.Operation.ADD;
@@ -96,5 +98,10 @@ public class UserService {
             log.warn("Попытка создать пользователя с пустым именем, вместо имени будет присвоен логин");
             user.setName(user.getLogin());
         }
+    }
+
+    public List<Feed> getFeedByUserId(Integer id) {
+        checkUserExist(id);
+        return feedService.getByUserId(id);
     }
 }

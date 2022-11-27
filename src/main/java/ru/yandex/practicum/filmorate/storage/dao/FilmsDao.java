@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -17,7 +16,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.GenreService;
-import ru.yandex.practicum.filmorate.service.MPAService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -39,7 +38,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class FilmsDao implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final MPAService mpaService;
+    private final MpaService mpaService;
     private final GenreService genreService;
     private final DirectorService directorService;
     private final UserStorage userStorage;
@@ -70,7 +69,7 @@ public class FilmsDao implements FilmStorage {
         int id = Objects.requireNonNull(keyHolder.getKey()).intValue();
         film.setId(id);
 
-        film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
+        film.setMpa(mpaService.getById(film.getMpa().getId()));
 
         if (!isEmpty(film.getGenres())) {
             List<List<Genre>> batchLists = Lists.partition(film.getGenres(), film.getGenres().size());
@@ -127,7 +126,7 @@ public class FilmsDao implements FilmStorage {
             }
         }
 
-        film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
+        film.setMpa(mpaService.getById(film.getMpa().getId()));
         film.setGenres(getGenresByFilmId(film.getId()));
 
         deleteFilmDirectors(film);
@@ -200,11 +199,34 @@ public class FilmsDao implements FilmStorage {
         }
     }
 
+    @Override
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM films where id = ?";
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (DataAccessException e) {
+            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+        }
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(Integer userId, Integer friendId) {
+        userStorage.checkUserExist(userId);
+        userStorage.checkUserExist(friendId);
+
+        String sql = "SELECT * FROM films f WHERE id IN " +
+                "(SELECT l1.id_film FROM likes_by_users l1, likes_by_users l2 " +
+                "WHERE l1.id_film = l2.id_film AND l1.id_user = ? AND l2.id_user = ? " +
+                "GROUP BY l1.id_film ORDER BY COUNT(l1.id_user) DESC)";
+
+        return jdbcTemplate.query(sql, (rs, rowMap) -> makeFilm(rs), userId, friendId);
+    }
+
     private List<Genre> getGenresByFilmId(int filmId) {
         String sql = "SELECT id_genre FROM film_genres WHERE id_film = ?";
         List<Integer> genresId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("id_genre"), filmId);
 
-        return genresId.stream().map(genreService::getGenreById).collect(toList());
+        return genresId.stream().map(genreService::getById).collect(toList());
     }
 
     private List<Director> getDirectorsByFilmId(int filmId) {
@@ -233,29 +255,6 @@ public class FilmsDao implements FilmStorage {
         jdbcTemplate.update(sqlQuery, film.getId());
     }
 
-    @Override
-    public void deleteById(Integer id) {
-        String sql = "DELETE FROM films where id = ?";
-        try {
-            jdbcTemplate.update(sql, id);
-        } catch (DataAccessException e) {
-            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
-        }
-    }
-
-    @Override
-    public Collection<Film> getCommonFilms(Integer userId, Integer friendId) {
-        userStorage.checkUserExist(userId);
-        userStorage.checkUserExist(friendId);
-
-        String sql = "SELECT * FROM films f WHERE id IN " +
-                "(SELECT l1.id_film FROM likes_by_users l1, likes_by_users l2 " +
-                "WHERE l1.id_film = l2.id_film AND l1.id_user = ? AND l2.id_user = ? " +
-                "GROUP BY l1.id_film ORDER BY COUNT(l1.id_user) DESC)";
-
-        return jdbcTemplate.query(sql, (rs, rowMap) -> makeFilm(rs), userId, friendId);
-    }
-
     private Film makeFilm(ResultSet rs) throws SQLException {
         LocalDate releaseDate =
                 rs.getDate("releaseDate") == null ?
@@ -266,7 +265,7 @@ public class FilmsDao implements FilmStorage {
                 .description(rs.getString("description"))
                 .releaseDate(releaseDate)
                 .duration(rs.getInt("duration"))
-                .mpa(mpaService.getMpaById(rs.getInt("mpa")))
+                .mpa(mpaService.getById(rs.getInt("mpa")))
                 .genres(getGenresByFilmId(rs.getInt("id")))
                 .directors(getDirectorsByFilmId(rs.getInt("id")))
                 .build();

@@ -32,7 +32,7 @@ public class ReviewController {
 
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable Integer id) {
-        return reviewService.getReviewById(id);
+        return reviewService.getById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

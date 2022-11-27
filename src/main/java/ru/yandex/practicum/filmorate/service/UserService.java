@@ -6,14 +6,16 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.enums.EventType;
-import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FriendsDao;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.util.Collection;
+
+import static ru.yandex.practicum.filmorate.model.enums.EventType.FRIEND;
+import static ru.yandex.practicum.filmorate.model.enums.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.enums.Operation.REMOVE;
 
 @Slf4j
 @Service
@@ -23,6 +25,56 @@ public class UserService {
     private final FriendsDao friendsDao;
     private final FeedService feedService;
     private final LikesDao likesDao;
+
+    public Collection<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    public User create(User user) {
+        validUser(user);
+        return userStorage.create(user);
+    }
+
+    public User update(User user) {
+        validUser(user);
+        return userStorage.update(user);
+    }
+
+    public User getById(Integer id) {
+        return userStorage.getById(id);
+    }
+
+    public void addFriend(Integer id, Integer friendId) {
+        friendsDao.addFriend(id, friendId);
+
+        feedService.add(friendId, id, FRIEND, ADD);
+    }
+
+    public void removeFriend(Integer id, Integer friendId) {
+        friendsDao.removeFriend(id, friendId);
+
+        feedService.add(friendId, id, FRIEND, REMOVE);
+    }
+
+    public Collection<User> getFriends(Integer id) {
+        return friendsDao.getFriends(id);
+    }
+
+    public Collection<User> getCommonFriends(Integer id, Integer otherId) {
+        return friendsDao.getCommonFriends(id, otherId);
+    }
+
+    public void deleteById(Integer id) {
+        userStorage.deleteById(id);
+    }
+
+    public Collection<Film> getRecommendedFilm(Integer id) {
+        return likesDao.getRecommendedFilm(id);
+    }
+
+    public void checkUserExist(Integer id) {
+        userStorage.checkUserExist(id);
+    }
 
     private void validUser(User user) {
         LocalDate now = LocalDate.now();
@@ -44,51 +96,5 @@ public class UserService {
             log.warn("Попытка создать пользователя с пустым именем, вместо имени будет присвоен логин");
             user.setName(user.getLogin());
         }
-    }
-
-    public Collection<User> findAll() {
-        return userStorage.findAll();
-    }
-
-    public User create(User user) {
-        validUser(user);
-        return userStorage.create(user);
-    }
-
-    public User update(User user) {
-        validUser(user);
-        return userStorage.update(user);
-    }
-
-    public User getById(Integer id) {
-        return userStorage.getById(id);
-    }
-
-    public void addFriendForDb(Integer id, Integer friendId) {
-        friendsDao.addFriend(id, friendId);
-
-        feedService.addFeed(friendId, id, EventType.FRIEND, Operation.ADD);
-    }
-
-    public void removeFriendFromDb(Integer id, Integer friendId) {
-        friendsDao.removeFriend(id, friendId);
-
-        feedService.addFeed(friendId, id, EventType.FRIEND, Operation.REMOVE);
-    }
-
-    public Collection<User> getFriendsFromDb(Integer id) {
-        return friendsDao.getFriends(id);
-    }
-
-    public Collection<User> getCommonFriendsFromDb(Integer id, Integer otherId) {
-        return friendsDao.getCommonFriends(id, otherId);
-    }
-
-    public void deleteById(Integer id) {
-        userStorage.deleteById(id);
-    }
-
-    public Collection<Film> getRecommendedFilm(Integer id) {
-        return likesDao.getRecommendedFilm(id);
     }
 }

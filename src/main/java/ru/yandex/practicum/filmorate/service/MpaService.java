@@ -2,22 +2,22 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.storage.dao.MPADao;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
-public class MPAService {
+public class MpaService {
 
-    private final MPADao mpaDao;
+    private final MpaDao mpaDao;
 
-    public Collection<MPA> findAll() {
+    public Collection<Mpa> findAll() {
         return mpaDao.findAll();
     }
 
-    public MPA getMpaById(int idMPA) {
+    public Mpa getById(int idMPA) {
         return mpaDao.getMpaById(idMPA);
     }
 }

@@ -13,7 +13,7 @@ public class GenreService {
 
     private final GenreDao genreDao;
 
-    public Genre getGenreById(int idGenre) {
+    public Genre getById(int idGenre) {
         return genreDao.getGenreById(idGenre);
     }
 

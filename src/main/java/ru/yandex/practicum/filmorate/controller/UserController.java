@@ -41,30 +41,30 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
-        userService.addFriendForDb(id, friendId);
+        userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
-        userService.removeFriendFromDb(id, friendId);
+        userService.removeFriend(id, friendId);
     }
 
-    @GetMapping("{id}/friends")
+    @GetMapping("/{id}/friends")
     public Collection<User> getFriends(@PathVariable Integer id) {
-        return userService.getFriendsFromDb(id);
+        return userService.getFriends(id);
     }
 
-    @GetMapping("{id}/friends/common/{otherId}")
+    @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
-        return userService.getCommonFriendsFromDb(id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 
-    @GetMapping("{id}/feed")
+    @GetMapping("/{id}/feed")
     public Collection<Feed> getFeed(@PathVariable Integer id) {
-        return feedService.getFeedByUserId(id);
+        return feedService.getByUserId(id);
     }
 
-    @DeleteMapping("{userId}")
+    @DeleteMapping("/{userId}")
     public void deleteById(@PathVariable Integer userId) {
         userService.deleteById(userId);
     }

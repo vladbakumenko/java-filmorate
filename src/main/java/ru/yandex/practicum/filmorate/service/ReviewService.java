@@ -6,11 +6,14 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewDao;
 
 import java.util.List;
+
+import static ru.yandex.practicum.filmorate.model.enums.EventType.REVIEW;
+import static ru.yandex.practicum.filmorate.model.enums.Operation.REMOVE;
+import static ru.yandex.practicum.filmorate.model.enums.Operation.UPDATE;
 
 @Service
 @Slf4j
@@ -27,7 +30,7 @@ public class ReviewService {
         validateReview(review);
 
         Review rw = reviewDao.create(review);
-        feedService.addFeed(rw.getReviewId(), rw.getUserId(), EventType.REVIEW, Operation.ADD);
+        feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, Operation.ADD);
         return rw;
     }
 
@@ -35,7 +38,7 @@ public class ReviewService {
         validateReview(review);
 
         Review rw = reviewDao.getById(review.getReviewId());
-        feedService.addFeed(rw.getReviewId(), rw.getUserId(), EventType.REVIEW, Operation.UPDATE);
+        feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, UPDATE);
         return reviewDao.update(review);
     }
 
@@ -43,7 +46,7 @@ public class ReviewService {
         Review rw = reviewDao.getById(id);
         reviewDao.removeReviewById(id);
 
-        feedService.addFeed(rw.getReviewId(), rw.getUserId(), EventType.REVIEW, Operation.REMOVE);
+        feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, REMOVE);
     }
 
     public void addLikeReview(Integer reviewId, Integer userId) {
@@ -63,7 +66,7 @@ public class ReviewService {
         reviewDao.removeDislikeReview(reviewId, userId);
     }
 
-    public Review getReviewById(Integer id) {
+    public Review getById(Integer id) {
         log.info("Получение отзыва с id {}", id);
         return reviewDao.getById(id);
     }

@@ -59,14 +59,14 @@ public class FeedTests {
 
         feed.setEventId(1);
 
-        assertTrue(feedStorage.getFeedByUserId(1).contains(feed));
+        assertTrue(feedStorage.getByUserId(1).contains(feed));
     }
 
     @Test
     @Order(2)
     public void testGetFeedByWrongId() {
         UserNotFoundException e = assertThrows(UserNotFoundException.class, () -> {
-            feedStorage.getFeedByUserId(10);
+            feedStorage.getByUserId(10);
         });
 
         assertEquals(e.getMessage(), "User with id: 10 not found in DB");
@@ -83,6 +83,6 @@ public class FeedTests {
                 .build();
         userStorage.create(user);
 
-        assertTrue(feedStorage.getFeedByUserId(2).isEmpty());
+        assertTrue(feedStorage.getByUserId(2).isEmpty());
     }
 }

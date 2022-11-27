@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
 
 import java.time.Instant;
-import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,12 +16,12 @@ public class FeedService {
 
     private final FeedStorage feedStorage;
 
-    public void addFeed(int idEntity, int idUser, EventType eventType, Operation operation) {
+    public void add(int idEntity, int idUser, EventType eventType, Operation operation) {
         long timestamp = Instant.now().toEpochMilli();
         feedStorage.addFeed(idEntity, idUser, timestamp, eventType, operation);
     }
 
-    public Collection<Feed> getFeedByUserId(int id) {
-        return feedStorage.getFeedByUserId(id);
+    public List<Feed> getByUserId(int id) {
+        return feedStorage.getByUserId(id);
     }
 }

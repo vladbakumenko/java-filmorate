@@ -48,7 +48,7 @@ public class LikesDao {
     public Collection<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         final String sqlQuery = "select * from films f "
                 + "left join (select id_film, count(*) likes_count from likes_by_users group by id_film) l on f.id = l.id_film "
-                + "left join mpa on f.id = mpa.id order by l.likes_count desc limit ?";
+                + "order by l.likes_count desc limit ?";
 
         var stream = jdbcTemplate
                 .query(sqlQuery, (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), count)
@@ -66,21 +66,6 @@ public class LikesDao {
         return stream.collect(toList());
     }
 
-    private Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
-        String sql = "SELECT l2.id_user AS recommended" +
-                "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
-                "   ON l1.id_film = l2.id_film " +
-                "   WHERE l1.id_user = ? AND l1.id_user <> l2.id_user" +
-                "   GROUP BY l1.id_user, l2.id_user" +
-                "   ORDER BY COUNT(*) DESC LIMIT 1";
-        try {
-            return jdbcTemplate.queryForObject(sql, Integer.class, idUser);
-        } catch (EmptyResultDataAccessException e) {
-            log.debug("No record found in database for " + idUser, e);
-            return idUser;
-        }
-    }
-
     public Collection<Film> getRecommendedFilm(Integer idUser) {
         Integer recommendedUserId = getUsersWithMaximumIntersectionLikes(idUser);
         String sql2 = "SELECT * FROM films AS f " +
@@ -94,6 +79,21 @@ public class LikesDao {
         } catch (EmptyResultDataAccessException e) {
             log.debug("No record found in database for " + recommendedUserId, e);
             return null;
+        }
+    }
+
+    private Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
+        String sql = "SELECT l2.id_user AS recommended" +
+                "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
+                "   ON l1.id_film = l2.id_film " +
+                "   WHERE l1.id_user = ? AND l1.id_user <> l2.id_user" +
+                "   GROUP BY l1.id_user, l2.id_user" +
+                "   ORDER BY COUNT(*) DESC LIMIT 1";
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, idUser);
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("No record found in database for " + idUser, e);
+            return idUser;
         }
     }
 }

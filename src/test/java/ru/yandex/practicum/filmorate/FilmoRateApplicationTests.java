@@ -26,15 +26,11 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.dao.FilmsDao;
-import ru.yandex.practicum.filmorate.storage.dao.FriendsDao;
-import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
-import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
-import ru.yandex.practicum.filmorate.storage.dao.MPADao;
-import ru.yandex.practicum.filmorate.storage.dao.UsersDao;
+import ru.yandex.practicum.filmorate.storage.dao.*;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -46,7 +42,7 @@ public class FilmoRateApplicationTests {
     private final FriendsDao friendsDao;
     private final GenreDao genreDao;
     private final LikesDao likesDao;
-    private final MPADao mpaDao;
+    private final MpaDao mpaDao;
     private final JdbcTemplate jdbcTemplate;
     private User user;
     private Film film;
@@ -84,7 +80,7 @@ public class FilmoRateApplicationTests {
                 .description("description")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 10))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -218,7 +214,7 @@ public class FilmoRateApplicationTests {
                 .description("description2")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 20))
                 .duration(200)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -238,7 +234,7 @@ public class FilmoRateApplicationTests {
                 .description("description2")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 20))
                 .duration(200)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -258,7 +254,7 @@ public class FilmoRateApplicationTests {
                 .description("description2")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 20))
                 .duration(200)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -278,7 +274,7 @@ public class FilmoRateApplicationTests {
                 .description("description2")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 20))
                 .duration(200)
-                .mpa(new MPA(2, "mpa2", "mpa-desc2"))
+                .mpa(new Mpa(2, "mpa2", "mpa-desc2"))
                 .genres(List.of(new Genre(2, "genre2")))
                 .build();
 
@@ -427,7 +423,7 @@ public class FilmoRateApplicationTests {
                 .description("description2")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 20))
                 .duration(200)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -439,7 +435,7 @@ public class FilmoRateApplicationTests {
                 .description("description3")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 20))
                 .duration(300)
-                .mpa(new MPA(2, null, null))
+                .mpa(new Mpa(2, null, null))
                 .genres(List.of(new Genre(2, null)))
                 .directors(List.of(director))
                 .build();
@@ -472,7 +468,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testGetMpaById() {
-        MPA mpa = mpaDao.getMpaById(1);
+        Mpa mpa = mpaDao.getMpaById(1);
 
         assertThat(mpa).hasFieldOrPropertyWithValue("id", 1);
         assertThat(mpa).hasFieldOrPropertyWithValue("name", "G");
@@ -500,7 +496,7 @@ public class FilmoRateApplicationTests {
                 .description("description")
                 .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -522,7 +518,7 @@ public class FilmoRateApplicationTests {
                 .description("description")
                 .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(searchDirector))
                 .build();
@@ -538,7 +534,7 @@ public class FilmoRateApplicationTests {
                 .description("description")
                 .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -555,7 +551,7 @@ public class FilmoRateApplicationTests {
                 .description("description")
                 .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(searchDirector))
                 .build();
@@ -571,7 +567,7 @@ public class FilmoRateApplicationTests {
                 .description("description")
                 .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -588,7 +584,7 @@ public class FilmoRateApplicationTests {
                 .description("description")
                 .releaseDate(LocalDate.of(2000, Month.JANUARY, 1))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(searchDirector))
                 .build();
@@ -631,7 +627,7 @@ public class FilmoRateApplicationTests {
                 .description("description2")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 10))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();
@@ -643,7 +639,7 @@ public class FilmoRateApplicationTests {
                 .description("description3")
                 .releaseDate(LocalDate.of(2010, Month.DECEMBER, 10))
                 .duration(100)
-                .mpa(new MPA(1, null, null))
+                .mpa(new Mpa(1, null, null))
                 .genres(List.of(new Genre(1, null)))
                 .directors(List.of(director))
                 .build();

@@ -21,8 +21,8 @@ public class ReviewController {
     }
 
     @PostMapping
-    public Review create(@RequestBody @Valid Review review) {
-        return reviewService.create(review);
+    public Review add(@RequestBody @Valid Review review) {
+        return reviewService.add(review);
     }
 
     @PutMapping
@@ -31,8 +31,8 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
-    public Review getReviewById(@PathVariable Integer id) {
-        return reviewService.getById(id);
+    public Review findById(@PathVariable Integer id) {
+        return reviewService.findById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -47,17 +47,17 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void removeLikeReview(@PathVariable Integer id, @PathVariable Integer userId) {
-        reviewService.removeLikeReview(id, userId);
+    public void deleteLikeReview(@PathVariable Integer id, @PathVariable Integer userId) {
+        reviewService.deleteLikeReview(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    public void removeDislikeReview(@PathVariable Integer id, @PathVariable Integer userId) {
-        reviewService.removeDislikeReview(id, userId);
+    public void deleteDislikeReview(@PathVariable Integer id, @PathVariable Integer userId) {
+        reviewService.deleteDislikeReview(id, userId);
     }
 
     @DeleteMapping("/{id}")
-    public void removeReviewById(@PathVariable("id") Integer id) {
+    public void deleteReviewById(@PathVariable("id") Integer id) {
         reviewService.delete(id);
     }
 }

@@ -1,22 +1,22 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Optional;
 
-import static java.util.Objects.requireNonNull;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+
+import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @Component
@@ -37,7 +37,7 @@ public class DirectorDao implements DirectorStorage {
     public Optional<Director> findById(Integer id) {
         String sql = "SELECT * FROM directors WHERE id = ?";
 
-        try{
+        try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, directorRowMapper, id));
         } catch (DataAccessException e) {
             log.error("No record found in database for " + id, e);

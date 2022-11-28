@@ -9,8 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -146,15 +146,15 @@ public class FilmsDao implements FilmStorage {
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
         } catch (DataAccessException e) {
-            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+            throw new NotFoundException(String.format("Film with id: %d not found", id));
         }
     }
 
     @Override
     public List<Film> findByDirectorIdSortedByYear(Integer directorId) {
         String sqlQuery = "SELECT * FROM films f "
-                    + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) "
-                    + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
+                + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) "
+                + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
                 .stream()
@@ -197,7 +197,7 @@ public class FilmsDao implements FilmStorage {
                 Collections.reverse(ans);
                 return ans;
             default:
-                throw new ValidationException("Incorrect parameters value");
+                throw new BadRequestException("Incorrect parameters value");
         }
     }
 
@@ -207,7 +207,7 @@ public class FilmsDao implements FilmStorage {
         try {
             jdbcTemplate.update(sql, id);
         } catch (DataAccessException e) {
-            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+            throw new NotFoundException(String.format("Film with id: %d not found", id));
         }
     }
 

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
@@ -75,7 +75,7 @@ public class FilmService {
             films = filmStorage.findByDirectorIdSortedByYear(directorId);
         } else if (sortParam.equals("likes")) {
             films = filmStorage.findByDirectorIdSortedByLikes(directorId);
-        } else throw new ValidationException(format("Incorrect parameters value: %s", sortParam));
+        } else throw new BadRequestException(format("Incorrect parameters value: %s", sortParam));
 
         return films;
     }
@@ -95,16 +95,16 @@ public class FilmService {
     private void validFilm(Film film) {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
             log.warn("Попытка создания фильма с пустым названием");
-            throw new ValidationException("Название фильма не может быть пустым");
+            throw new BadRequestException("Название фильма не может быть пустым");
         } else if (film.getDescription().length() > 200) {
             log.warn("Попытка создания фильма с описанием свыше 200 знаков");
-            throw new ValidationException("Описание фильма превышает максимальное количество знаков 200");
+            throw new BadRequestException("Описание фильма превышает максимальное количество знаков 200");
         } else if (film.getReleaseDate().isBefore(firstFilmBirthday)) {
             log.warn("Попытка создания фильма с датой, предшествующей появлению первого фильма");
-            throw new ValidationException("Дата релиза фильма введена неверна");
+            throw new BadRequestException("Дата релиза фильма введена неверна");
         } else if (film.getDuration() <= 0) {
             log.warn("Попытка создания фильма с отрицательной продолжительностью");
-            throw new ValidationException("Продолжительность фильма не может быть отрицательной");
+            throw new BadRequestException("Продолжительность фильма не может быть отрицательной");
         }
     }
 }

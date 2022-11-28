@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -84,14 +84,14 @@ public class UserService {
         if (user.getEmail() == null || user.getEmail().isEmpty() || user.getEmail().isBlank()
                 || !user.getEmail().contains("@")) {
             log.warn("Попытка создать пользователя с пустым или не корректным адресом email");
-            throw new ValidationException("Адрес почты введён неверно");
+            throw new BadRequestException("Адрес почты введён неверно");
         } else if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank()
                 || user.getLogin().contains(" ")) {
             log.warn("Попытка создать пользователя с пустым или содержащим пробелы логином");
-            throw new ValidationException("Логин не должен быть пустым и содержать пробелы");
+            throw new BadRequestException("Логин не должен быть пустым и содержать пробелы");
         } else if (user.getBirthday().isAfter(now)) {
             log.warn("Попытка создать пользователя с датой рождения из будущего");
-            throw new ValidationException("День рождения не может быть из будущего :)");
+            throw new BadRequestException("День рождения не может быть из будущего :)");
         }
 
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {

@@ -22,7 +22,7 @@ public class DirectorService {
         return directorStorage.findAll();
     }
 
-    public Director findById(Integer id) {
+    public Director getById(Integer id) {
         Optional<Director> director = directorStorage.findById(id);
 
         if (director.isEmpty()) {
@@ -41,7 +41,7 @@ public class DirectorService {
     }
 
     public Director update(Director director) {
-        findById(director.getId());
+        getById(director.getId());
 
         Optional<Director> optionalDirector = directorStorage.update(director);
 
@@ -52,7 +52,7 @@ public class DirectorService {
     }
 
     public void delete(Integer id) {
-        findById(id);
+        getById(id);
 
         directorStorage.delete(id);
     }

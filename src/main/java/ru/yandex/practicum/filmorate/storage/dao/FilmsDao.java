@@ -235,7 +235,7 @@ public class FilmsDao implements FilmStorage {
         String sql = "SELECT director_id FROM film_directors WHERE film_id = ?";
         List<Integer> directorsId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("director_id"), filmId);
 
-        return directorsId.stream().map(directorService::findById).collect(toList());
+        return directorsId.stream().map(directorService::getById).collect(toList());
     }
 
     private void setFilmDirectors(Film film) {

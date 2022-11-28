@@ -72,7 +72,7 @@ public class DirectorTests {
         directorDao.delete(1);
 
         Exception exception = assertThrows(RuntimeException.class,
-                () -> directorService.findById(1));
+                () -> directorService.getById(1));
 
         assertThat(exception.getMessage())
                 .contains("Director with id: 1 not found in DB");

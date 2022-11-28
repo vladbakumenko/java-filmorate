@@ -62,14 +62,14 @@ public class FilmService {
         feedService.add(id, userId, LIKE, REMOVE);
     }
 
-    public List<Film> findPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+    public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         return likesDao.getPopular(count, genreId, year);
     }
 
-    public List<Film> findByDirectorId(Integer directorId, String sortParam) {
+    public List<Film> getByDirectorId(Integer directorId, String sortParam) {
         List<Film> films;
 
-        directorService.findById(directorId);
+        directorService.getById(directorId);
 
         if (sortParam.equals("year")) {
             films = filmStorage.findByDirectorIdSortedByYear(directorId);

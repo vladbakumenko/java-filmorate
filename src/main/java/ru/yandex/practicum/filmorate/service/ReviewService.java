@@ -3,8 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewDao;
@@ -74,10 +73,10 @@ public class ReviewService {
     public void validateReview(Review review) {
         if (review.getFilmId() < 0 || review.getFilmId() == null) {
             log.warn("Попытка добавить отзыв к несуществующему фильму");
-            throw new FilmNotFoundException("Нельзя добавить отзыв к несуществующему фильму");
+            throw new NotFoundException("Нельзя добавить отзыв к несуществующему фильму");
         } else if (review.getUserId() < 0 || review.getUserId() == null) {
             log.warn("Пользователя с таким id не существует");
-            throw new UserNotFoundException("Несуществующий пользователь не может добавлять отзывы");
+            throw new NotFoundException("Несуществующий пользователь не может добавлять отзывы");
         }
     }
 }

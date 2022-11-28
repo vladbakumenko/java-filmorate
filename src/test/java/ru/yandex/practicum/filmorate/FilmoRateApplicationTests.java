@@ -20,9 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import lombok.RequiredArgsConstructor;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -73,7 +71,7 @@ public class FilmoRateApplicationTests {
                 .name("Director")
                 .build();
 
-        director = directorStorage.create(director);
+        director = directorStorage.add(director).orElseThrow();
 
         film = Film.builder()
                 .name("film")
@@ -99,7 +97,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testFindUserWithWrongId() {
-        UserNotFoundException e = assertThrows(UserNotFoundException.class, () -> {
+        NotFoundException e = assertThrows(NotFoundException.class, () -> {
             userStorage.getById(100);
         });
 
@@ -174,7 +172,7 @@ public class FilmoRateApplicationTests {
                 .birthday(LocalDate.of(2000, Month.DECEMBER, 20))
                 .build();
 
-        UserNotFoundException e = assertThrows(UserNotFoundException.class, () -> {
+        NotFoundException e = assertThrows(NotFoundException.class, () -> {
             userStorage.update(userTest);
         });
 
@@ -192,7 +190,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testFindFilmWithWrongId() {
-        FilmNotFoundException e = assertThrows(FilmNotFoundException.class, () -> {
+        NotFoundException e = assertThrows(NotFoundException.class, () -> {
             filmStorage.getById(100);
         });
 
@@ -278,7 +276,7 @@ public class FilmoRateApplicationTests {
                 .genres(List.of(new Genre(2, "genre2")))
                 .build();
 
-        FilmNotFoundException e = assertThrows(FilmNotFoundException.class, () -> {
+        NotFoundException e = assertThrows(NotFoundException.class, () -> {
             filmStorage.update(testFilm);
         });
 
@@ -303,7 +301,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testAddFriendWithWrongId() {
-        UserNotFoundException e = assertThrows(UserNotFoundException.class, () -> {
+        NotFoundException e = assertThrows(NotFoundException.class, () -> {
             friendsDao.addFriend(1, 100);
         });
 
@@ -381,7 +379,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testGetGenreByIdWithWrongId() {
-        ObjectNotFoundException e = assertThrows(ObjectNotFoundException.class, () -> {
+        NotFoundException e = assertThrows(NotFoundException.class, () -> {
             genreDao.getGenreById(10);
         });
 
@@ -476,7 +474,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testGetMpaByIdWithWrongId() {
-        ObjectNotFoundException e = assertThrows(ObjectNotFoundException.class, () -> {
+        NotFoundException e = assertThrows(NotFoundException.class, () -> {
             mpaDao.getMpaById(10);
         });
 
@@ -512,7 +510,7 @@ public class FilmoRateApplicationTests {
                 .name("DirectorForSSSSSEaRCH")
                 .build();
 
-        searchDirector = directorStorage.create(searchDirector);
+        searchDirector = directorStorage.add(searchDirector).orElseThrow();
         Film testFilm = Film.builder()
                 .name("filmForFind")
                 .description("description")
@@ -545,7 +543,7 @@ public class FilmoRateApplicationTests {
                 .name("DirectorForSSSSSEaRCH")
                 .build();
 
-        searchDirector = directorStorage.create(searchDirector);
+        searchDirector = directorStorage.add(searchDirector).orElseThrow();
         Film testFilm2 = Film.builder()
                 .name("filmForFind")
                 .description("description")
@@ -578,7 +576,7 @@ public class FilmoRateApplicationTests {
                 .name("DirectorForSSSSSEaRCH")
                 .build();
 
-        searchDirector = directorStorage.create(searchDirector);
+        searchDirector = directorStorage.add(searchDirector).orElseThrow();
         Film testFilm2 = Film.builder()
                 .name("filmForFindsearch")
                 .description("description")

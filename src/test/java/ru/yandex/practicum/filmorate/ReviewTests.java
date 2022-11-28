@@ -5,7 +5,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -77,7 +77,7 @@ public class ReviewTests {
     @Order(5)
     public void testDeleteReview() {
         reviewDao.removeReviewById(1);
-        Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
+        Exception exception = assertThrows(NotFoundException.class, () -> {
             reviewDao.getById(1);
         });
         assertThat(exception.getMessage()).contains("Review with id: " + 1 + " not found");

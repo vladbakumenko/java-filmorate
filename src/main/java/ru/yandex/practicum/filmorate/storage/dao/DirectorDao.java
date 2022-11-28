@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
@@ -39,7 +38,7 @@ public class DirectorDao implements DirectorStorage {
         try {
             return jdbcTemplate.queryForObject(sql, directorMapper, id);
         } catch (DataAccessException e) {
-            throw new ObjectNotFoundException(format("Director with id: %d not found in DB", id));
+            throw new NotFoundException(format("Director with id: %d not found in DB", id));
         }
     }
 

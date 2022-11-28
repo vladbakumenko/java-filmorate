@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import lombok.RequiredArgsConstructor;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.dao.DirectorDao;
 
@@ -70,7 +70,7 @@ public class DirectorTests {
     public void testDeleteDirector() {
         directorDao.delete(1);
 
-        Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
+        Exception exception = assertThrows(NotFoundException.class, () -> {
             directorDao.getById(1);
         });
 

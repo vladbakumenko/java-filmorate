@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class GenreDao {
                     (rs, rowNum) -> new Genre(rs.getInt("id"), rs.getString("name")),
                     idGenre);
         } catch (DataAccessException e) {
-            throw new ObjectNotFoundException(String.format("Genre with id: %d not found in DB", idGenre));
+            throw new NotFoundException(String.format("Genre with id: %d not found in DB", idGenre));
         }
     }
 

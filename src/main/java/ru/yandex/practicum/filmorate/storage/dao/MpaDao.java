@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class MpaDao {
                     rs.getString("name"),
                     rs.getString("description")), idMPA);
         } catch (DataAccessException e) {
-            throw new ObjectNotFoundException(String.format("Rating MPA with id: %d not found in DB", idMPA));
+            throw new NotFoundException(String.format("Rating MPA with id: %d not found in DB", idMPA));
         }
     }
 

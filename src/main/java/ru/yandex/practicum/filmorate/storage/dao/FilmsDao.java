@@ -9,8 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -146,7 +146,7 @@ public class FilmsDao implements FilmStorage {
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
         } catch (DataAccessException e) {
-            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+            throw new NotFoundException(String.format("Film with id: %d not found", id));
         }
     }
 
@@ -163,7 +163,7 @@ public class FilmsDao implements FilmStorage {
                     + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) "
                     + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l "
                     + "ORDER BY likes_count ASC";
-        } else throw new ValidationException("Incorrect parameters value");
+        } else throw new BadRequestException("Incorrect parameters value");
 
         directorService.getById(directorId);
 
@@ -195,7 +195,7 @@ public class FilmsDao implements FilmStorage {
                 Collections.reverse(ans);
                 return ans;
             default:
-                throw new ValidationException("Incorrect parameters value");
+                throw new BadRequestException("Incorrect parameters value");
         }
     }
 
@@ -205,7 +205,7 @@ public class FilmsDao implements FilmStorage {
         try {
             jdbcTemplate.update(sql, id);
         } catch (DataAccessException e) {
-            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+            throw new NotFoundException(String.format("Film with id: %d not found", id));
         }
     }
 

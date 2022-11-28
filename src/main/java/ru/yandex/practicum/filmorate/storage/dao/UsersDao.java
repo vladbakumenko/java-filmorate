@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -72,7 +72,7 @@ public class UsersDao implements UserStorage {
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeUser(rs), id);
         } catch (DataAccessException e) {
-            throw new UserNotFoundException(String.format("User with id: %d not found in DB", id));
+            throw new NotFoundException(String.format("User with id: %d not found in DB", id));
         }
     }
 
@@ -83,7 +83,7 @@ public class UsersDao implements UserStorage {
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
 
         if (!exists) {
-            throw new UserNotFoundException(String.format("User with id: %d not found in DB", id));
+            throw new NotFoundException(String.format("User with id: %d not found in DB", id));
         }
     }
 
@@ -93,7 +93,7 @@ public class UsersDao implements UserStorage {
         try {
             jdbcTemplate.update(sql, id);
         } catch (DataAccessException e) {
-            throw new UserNotFoundException(String.format("User with id: %d not found", id));
+            throw new NotFoundException(String.format("User with id: %d not found", id));
         }
     }
 

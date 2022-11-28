@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
@@ -28,7 +28,7 @@ public class ReviewDao implements ReviewStorage {
             return jdbcTemplate.queryForObject(sql,
                     reviewRowMapper, id);
         } catch (DataAccessException da) {
-            throw new ObjectNotFoundException("Review with id: " + id + " not found");
+            throw new NotFoundException("Review with id: " + id + " not found");
         }
     }
 

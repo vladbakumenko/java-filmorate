@@ -29,6 +29,8 @@ public class LikesDao {
         filmStorage.getById(idFilm);
         userStorage.checkUserExist(idUser);
 
+        removeLike(idFilm, idUser);
+
         String sql = "insert into likes_by_users(id_film, id_user) values (?, ?)";
         jdbcTemplate.update(sql, idFilm, idUser);
         log.info("Like added for film with id: {} from user with id: {}", idFilm, idUser);
@@ -46,7 +48,7 @@ public class LikesDao {
     public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         final String sqlQuery = "select * from films f "
                 + "left join (select id_film, count(*) likes_count from likes_by_users group by id_film) l on f.id = l.id_film "
-                + "left join mpa on f.id = mpa.id order by l.likes_count desc limit ?";
+                + "order by l.likes_count desc limit ?";
 
         var stream = jdbcTemplate
                 .query(sqlQuery, (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), count)

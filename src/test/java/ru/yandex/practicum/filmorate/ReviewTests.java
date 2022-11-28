@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.FilmsDao;
@@ -39,7 +39,7 @@ public class ReviewTests {
                 id(1).description("description").
                 name("film").duration(120).
                 releaseDate(LocalDate.of(2001, 8, 1)).
-                mpa(new MPA(1, "mpa", "mpa")).
+                mpa(new Mpa(1, "mpa", "mpa")).
                 build());
     }
 

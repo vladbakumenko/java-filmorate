@@ -10,6 +10,4 @@ public interface ReviewStorage {
     Review create(Review review);
     Review update(Review review);
     void removeReviewById(Integer id);
-
-
 }

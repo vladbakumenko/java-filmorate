@@ -5,21 +5,21 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
 
 @Component
 @RequiredArgsConstructor
-public class MPADao {
+public class MpaDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public MPA getMpaById(int idMPA) {
+    public Mpa getMpaById(int idMPA) {
         String sql = "select id, name, description from mpa where id = ?";
 
         try {
-            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new MPA(rs.getInt("id"),
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Mpa(rs.getInt("id"),
                     rs.getString("name"),
                     rs.getString("description")), idMPA);
         } catch (DataAccessException e) {
@@ -27,10 +27,10 @@ public class MPADao {
         }
     }
 
-    public Collection<MPA> findAll() {
+    public Collection<Mpa> findAll() {
         String sql = "select * from mpa";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new MPA(rs.getInt("id"),
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("description")));
     }

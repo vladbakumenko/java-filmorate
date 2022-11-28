@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
@@ -59,21 +60,11 @@ public class FeedTests {
 
         feed.setEventId(1);
 
-        assertTrue(feedStorage.getFeedByUserId(1).contains(feed));
+        assertTrue(feedStorage.getByUserId(1).contains(feed));
     }
 
     @Test
     @Order(2)
-    public void testGetFeedByWrongId() {
-        UserNotFoundException e = assertThrows(UserNotFoundException.class, () -> {
-            feedStorage.getFeedByUserId(10);
-        });
-
-        assertEquals(e.getMessage(), "User with id: 10 not found in DB");
-    }
-
-    @Test
-    @Order(3)
     public void testGetFeedByIdWithoutEvents() {
         User user = User.builder()
                 .email("email2@email.ru")
@@ -83,6 +74,6 @@ public class FeedTests {
                 .build();
         userStorage.create(user);
 
-        assertTrue(feedStorage.getFeedByUserId(2).isEmpty());
+        assertTrue(feedStorage.getByUserId(2).isEmpty());
     }
 }

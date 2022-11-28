@@ -9,21 +9,17 @@ import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class FeedDao implements FeedStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final UsersDao usersDao;
     private final FeedMapper feedMapper;
 
     @Override
-    public Collection<Feed> getFeedByUserId(int id) {
-        usersDao.checkUserExist(id);
+    public List<Feed> getByUserId(int id) {
 
         String sql = "select * from feed where id_user = ? order by timestamp asc";
 

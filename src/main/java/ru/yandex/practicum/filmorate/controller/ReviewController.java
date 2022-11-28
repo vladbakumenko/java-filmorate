@@ -15,7 +15,8 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping
-    public List<Review> findAll(@RequestParam(required = false) Integer filmId, @RequestParam(required = false, defaultValue = "10") Integer count) {
+    public List<Review> findAll(@RequestParam(required = false) Integer filmId,
+                                @RequestParam(required = false, defaultValue = "10") Integer count) {
         return reviewService.findAll(filmId, count);
     }
 
@@ -31,7 +32,7 @@ public class ReviewController {
 
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable Integer id) {
-        return reviewService.getReviewById(id);
+        return reviewService.getById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

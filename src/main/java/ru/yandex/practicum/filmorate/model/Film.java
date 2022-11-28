@@ -18,7 +18,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private MPA mpa;
+    private Mpa mpa;
     private List<Genre> genres;
     private List<Director> directors;
 }

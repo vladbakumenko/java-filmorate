@@ -149,21 +149,23 @@ public class FilmsDao implements FilmStorage {
     }
 
     @Override
-    public List<Film> getSorted(Integer directorId, String param) {
-        String sqlQuery = "";
-
-        if (param.equals("year")) {
-            sqlQuery = "SELECT * FROM films f "
+    public List<Film> findByDirectorIdSortedByYear(Integer directorId) {
+        String sqlQuery = "SELECT * FROM films f "
                     + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) "
                     + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
-        } else if (param.equals("likes")) {
-            sqlQuery = "SELECT * FROM "
-                    + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) "
-                    + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l "
-                    + "ORDER BY likes_count ASC";
-        } else throw new ValidationException("Incorrect parameters value");
 
-        directorService.getById(directorId);
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
+                .stream()
+                .map(film -> getById(film.getId()))
+                .collect(toList());
+    }
+
+    @Override
+    public List<Film> findByDirectorIdSortedByLikes(Integer directorId) {
+        String sqlQuery = "SELECT * FROM "
+                + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) "
+                + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l "
+                + "ORDER BY likes_count ASC";
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
                 .stream()
@@ -197,6 +199,16 @@ public class FilmsDao implements FilmStorage {
         }
     }
 
+    @Override
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM films where id = ?";
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (DataAccessException e) {
+            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
+        }
+    }
+
     private List<Genre> getGenresByFilmId(int filmId) {
         String sql = "SELECT id_genre FROM film_genres WHERE id_film = ?";
         List<Integer> genresId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("id_genre"), filmId);
@@ -208,7 +220,7 @@ public class FilmsDao implements FilmStorage {
         String sql = "SELECT director_id FROM film_directors WHERE film_id = ?";
         List<Integer> directorsId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("director_id"), filmId);
 
-        return directorsId.stream().map(directorService::getById).collect(toList());
+        return directorsId.stream().map(directorService::findById).collect(toList());
     }
 
     private void setFilmDirectors(Film film) {
@@ -228,16 +240,6 @@ public class FilmsDao implements FilmStorage {
         String sqlQuery = "DELETE FROM film_directors WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, film.getId());
-    }
-
-    @Override
-    public void deleteById(Integer id) {
-        String sql = "DELETE FROM films where id = ?";
-        try {
-            jdbcTemplate.update(sql, id);
-        } catch (DataAccessException e) {
-            throw new FilmNotFoundException(String.format("Film with id: %d not found", id));
-        }
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {

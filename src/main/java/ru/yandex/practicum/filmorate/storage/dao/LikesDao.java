@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
@@ -43,7 +43,7 @@ public class LikesDao {
         log.info("Like removed for film with id: {} from user with id: {}", idFilm, idUser);
     }
 
-    public Collection<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+    public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         final String sqlQuery = "select * from films f "
                 + "left join (select id_film, count(*) likes_count from likes_by_users group by id_film) l on f.id = l.id_film "
                 + "left join mpa on f.id = mpa.id order by l.likes_count desc limit ?";
@@ -64,21 +64,6 @@ public class LikesDao {
         return stream.collect(toList());
     }
 
-    private Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
-        String sql = "SELECT l2.id_user AS recommended" +
-                "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
-                "   ON l1.id_film = l2.id_film " +
-                "   WHERE l1.id_user = ? AND l1.id_user <> l2.id_user" +
-                "   GROUP BY l1.id_user, l2.id_user" +
-                "   ORDER BY COUNT(*) DESC LIMIT 1";
-        try {
-            return jdbcTemplate.queryForObject(sql, Integer.class, idUser);
-        } catch (EmptyResultDataAccessException e) {
-            log.debug("No record found in database for " + idUser, e);
-            return idUser;
-        }
-    }
-
     public Collection<Film> getRecommendedFilm(Integer idUser) {
         Integer recommendedUserId = getUsersWithMaximumIntersectionLikes(idUser);
         String sql2 = "SELECT * FROM films AS f " +
@@ -92,6 +77,21 @@ public class LikesDao {
         } catch (EmptyResultDataAccessException e) {
             log.debug("No record found in database for " + recommendedUserId, e);
             return null;
+        }
+    }
+
+    private Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
+        String sql = "SELECT l2.id_user AS recommended" +
+                "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
+                "   ON l1.id_film = l2.id_film " +
+                "   WHERE l1.id_user = ? AND l1.id_user <> l2.id_user" +
+                "   GROUP BY l1.id_user, l2.id_user" +
+                "   ORDER BY COUNT(*) DESC LIMIT 1";
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, idUser);
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("No record found in database for " + idUser, e);
+            return idUser;
         }
     }
 }

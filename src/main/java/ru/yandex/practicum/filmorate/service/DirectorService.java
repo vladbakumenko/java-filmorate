@@ -2,10 +2,15 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -13,23 +18,42 @@ public class DirectorService {
 
     private final DirectorStorage directorStorage;
 
-    public Collection<Director> findAll() {
+    public List<Director> findAll() {
         return directorStorage.findAll();
     }
 
-    public Director create(Director director) {
-        return directorStorage.create(director);
+    public Director findById(Integer id) {
+        Optional<Director> director = directorStorage.findById(id);
+
+        if (director.isEmpty()) {
+            throw new ObjectNotFoundException(format("Director with id: %d not found in DB", id));
+        }
+        return director.get();
+    }
+
+    public Director add(Director director) {
+        Optional<Director> optionalDirector = directorStorage.add(director);
+
+        if (optionalDirector.isEmpty()) {
+            throw new ObjectNotFoundException("Director was not added.");
+        }
+        return optionalDirector.get();
     }
 
     public Director update(Director director) {
-        return directorStorage.update(director);
-    }
+        findById(director.getId());
 
-    public Director getById(Integer id) {
-        return directorStorage.getById(id);
+        Optional<Director> optionalDirector = directorStorage.update(director);
+
+        if (optionalDirector.isEmpty()) {
+            throw new ObjectNotFoundException(format("Director with id: %d was not updated.", director.getId()));
+        }
+        return optionalDirector.get();
     }
 
     public void delete(Integer id) {
+        findById(id);
+
         directorStorage.delete(id);
     }
 }

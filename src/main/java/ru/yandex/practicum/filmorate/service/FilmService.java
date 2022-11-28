@@ -13,7 +13,10 @@ import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -25,6 +28,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final LikesDao likesDao;
     private final FeedService feedService;
+    private final DirectorService directorService;
 
     private void validFilm(Film film) {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
@@ -73,12 +77,22 @@ public class FilmService {
         feedService.addFeed(id, userId, EventType.LIKE, Operation.REMOVE);
     }
 
-    public Collection<Film> getPopularFromDb(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+    public List<Film> findPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         return likesDao.getPopular(count, genreId, year);
     }
 
-    public Collection<Film> getFilmsByDirector(Integer directorId, String sortParam) {
-        return filmStorage.getSorted(directorId, sortParam);
+    public List<Film> findByDirectorId(Integer directorId, String sortParam) {
+        List<Film> films;
+
+        directorService.findById(directorId);
+
+        if (sortParam.equals("year")) {
+            films = filmStorage.findByDirectorIdSortedByYear(directorId);
+        } else if (sortParam.equals("likes")) {
+            films = filmStorage.findByDirectorIdSortedByLikes(directorId);
+        } else throw new ValidationException(format("Incorrect parameters value: %s", sortParam));
+
+        return films;
     }
 
     public Collection<Film> searchFromDb(String query, String groupBy) {

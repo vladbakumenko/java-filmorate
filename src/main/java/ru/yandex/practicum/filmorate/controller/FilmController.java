@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -46,17 +47,17 @@ public class FilmController {
         filmService.removeLikeFromDb(id, userId);
     }
 
-    @GetMapping("popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false) Integer count,
-                                       @RequestParam(required = false) Optional<Integer> genreId,
-                                       @RequestParam(required = false) Optional<Integer> year) {
-        return filmService.getPopularFromDb(count, genreId, year);
+    @GetMapping("/popular")
+    public List<Film> findPopular(@RequestParam(defaultValue = "10", required = false) Integer count,
+                                  @RequestParam(required = false) Optional<Integer> genreId,
+                                  @RequestParam(required = false) Optional<Integer> year) {
+        return filmService.findPopular(count, genreId, year);
     }
 
-    @GetMapping("director/{directorId}")
-    public Collection<Film> getFilmsByDirector(@PathVariable Integer directorId,
-                                               @RequestParam String sortBy) {
-        return filmService.getFilmsByDirector(directorId, sortBy);
+    @GetMapping("/director/{directorId}")
+    public List<Film> findByDirectorId(@PathVariable Integer directorId,
+                                       @RequestParam String sortBy) {
+        return filmService.findByDirectorId(directorId, sortBy);
     }
 
     @GetMapping("/search")

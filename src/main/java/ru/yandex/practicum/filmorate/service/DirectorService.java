@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
@@ -26,7 +26,7 @@ public class DirectorService {
         Optional<Director> director = directorStorage.findById(id);
 
         if (director.isEmpty()) {
-            throw new ObjectNotFoundException(format("Director with id: %d not found in DB", id));
+            throw new NotFoundException(format("Director with id: %d not found in DB", id));
         }
         return director.get();
     }
@@ -35,7 +35,7 @@ public class DirectorService {
         Optional<Director> optionalDirector = directorStorage.add(director);
 
         if (optionalDirector.isEmpty()) {
-            throw new ObjectNotFoundException("Director was not added.");
+            throw new NotFoundException("Director was not added.");
         }
         return optionalDirector.get();
     }
@@ -46,7 +46,7 @@ public class DirectorService {
         Optional<Director> optionalDirector = directorStorage.update(director);
 
         if (optionalDirector.isEmpty()) {
-            throw new ObjectNotFoundException(format("Director with id: %d was not updated.", director.getId()));
+            throw new NotFoundException(format("Director with id: %d was not updated.", director.getId()));
         }
         return optionalDirector.get();
     }

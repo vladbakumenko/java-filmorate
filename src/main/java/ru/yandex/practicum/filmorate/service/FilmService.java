@@ -75,7 +75,7 @@ public class FilmService {
             films = filmStorage.findByDirectorIdSortedByYear(directorId);
         } else if (sortParam.equals("likes")) {
             films = filmStorage.findByDirectorIdSortedByLikes(directorId);
-        } else throw new ValidationException(format("Incorrect parameters value: %s", sortParam));
+        } else throw new BadRequestException(format("Incorrect parameters value: %s", sortParam));
 
         return films;
     }

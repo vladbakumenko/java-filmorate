@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
@@ -45,7 +45,7 @@ public class LikesDao {
         log.info("Like removed for film with id: {} from user with id: {}", idFilm, idUser);
     }
 
-    public Collection<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+    public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         final String sqlQuery = "select * from films f "
                 + "left join (select id_film, count(*) likes_count from likes_by_users group by id_film) l on f.id = l.id_film "
                 + "order by l.likes_count desc limit ?";

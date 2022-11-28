@@ -9,8 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -151,21 +151,23 @@ public class FilmsDao implements FilmStorage {
     }
 
     @Override
-    public List<Film> getSorted(Integer directorId, String param) {
-        String sqlQuery = "";
+    public List<Film> findByDirectorIdSortedByYear(Integer directorId) {
+        String sqlQuery = "SELECT * FROM films f "
+                + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) "
+                + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
 
-        if (param.equals("year")) {
-            sqlQuery = "SELECT * FROM films f "
-                    + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) "
-                    + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
-        } else if (param.equals("likes")) {
-            sqlQuery = "SELECT * FROM "
-                    + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) "
-                    + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l "
-                    + "ORDER BY likes_count ASC";
-        } else throw new BadRequestException("Incorrect parameters value");
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
+                .stream()
+                .map(film -> getById(film.getId()))
+                .collect(toList());
+    }
 
-        directorService.getById(directorId);
+    @Override
+    public List<Film> findByDirectorIdSortedByLikes(Integer directorId) {
+        String sqlQuery = "SELECT * FROM "
+                + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) "
+                + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l "
+                + "ORDER BY likes_count ASC";
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
                 .stream()

@@ -1,49 +1,52 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.sql.PreparedStatement;
-import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DirectorDao implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Director> directorMapper;
+    private final RowMapper<Director> directorRowMapper;
 
     @Override
-    public Collection<Director> findAll() {
+    public List<Director> findAll() {
         String sql = "SELECT * FROM directors";
 
-        return jdbcTemplate.query(sql, directorMapper);
+        return jdbcTemplate.query(sql, directorRowMapper);
     }
 
     @Override
-    public Director getById(Integer id) {
+    public Optional<Director> findById(Integer id) {
         String sql = "SELECT * FROM directors WHERE id = ?";
 
         try {
-            return jdbcTemplate.queryForObject(sql, directorMapper, id);
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, directorRowMapper, id));
         } catch (DataAccessException e) {
-            throw new NotFoundException(format("Director with id: %d not found in DB", id));
+            log.error("No record found in database for " + id, e);
         }
+        return Optional.empty();
     }
 
     @Override
-    public Director create(Director director) {
+    public Optional<Director> add(Director director) {
         String sql = "INSERT INTO directors(name) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -56,24 +59,20 @@ public class DirectorDao implements DirectorStorage {
         int id = requireNonNull(keyHolder.getKey()).intValue();
         director.setId(id);
 
-        return director;
+        return Optional.of(director);
     }
 
     @Override
-    public Director update(Director director) {
-        getById(director.getId());
-
+    public Optional<Director> update(Director director) {
         String sql = "UPDATE directors SET name = ? WHERE id = ?";
 
         jdbcTemplate.update(sql, director.getName(), director.getId());
 
-        return director;
+        return Optional.of(director);
     }
 
     @Override
     public void delete(Integer id) {
-        getById(id);
-
         String sqlQuery = "DELETE FROM film_directors WHERE director_id = ?";
         jdbcTemplate.update(sqlQuery, id);
 

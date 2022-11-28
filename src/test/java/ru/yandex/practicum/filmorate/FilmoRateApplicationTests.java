@@ -71,7 +71,7 @@ public class FilmoRateApplicationTests {
                 .name("Director")
                 .build();
 
-        director = directorStorage.create(director);
+        director = directorStorage.add(director).orElseThrow();
 
         film = Film.builder()
                 .name("film")
@@ -510,7 +510,7 @@ public class FilmoRateApplicationTests {
                 .name("DirectorForSSSSSEaRCH")
                 .build();
 
-        searchDirector = directorStorage.create(searchDirector);
+        searchDirector = directorStorage.add(searchDirector).orElseThrow();
         Film testFilm = Film.builder()
                 .name("filmForFind")
                 .description("description")
@@ -543,7 +543,7 @@ public class FilmoRateApplicationTests {
                 .name("DirectorForSSSSSEaRCH")
                 .build();
 
-        searchDirector = directorStorage.create(searchDirector);
+        searchDirector = directorStorage.add(searchDirector).orElseThrow();
         Film testFilm2 = Film.builder()
                 .name("filmForFind")
                 .description("description")
@@ -576,7 +576,7 @@ public class FilmoRateApplicationTests {
                 .name("DirectorForSSSSSEaRCH")
                 .build();
 
-        searchDirector = directorStorage.create(searchDirector);
+        searchDirector = directorStorage.add(searchDirector).orElseThrow();
         Film testFilm2 = Film.builder()
                 .name("filmForFindsearch")
                 .description("description")

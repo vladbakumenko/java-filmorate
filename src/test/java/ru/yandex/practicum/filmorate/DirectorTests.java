@@ -12,8 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import lombok.RequiredArgsConstructor;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.storage.dao.DirectorDao;
 
 @SpringBootTest
@@ -23,12 +23,13 @@ import ru.yandex.practicum.filmorate.storage.dao.DirectorDao;
 public class DirectorTests {
 
     private final DirectorDao directorDao;
+    private final DirectorService directorService;
 
     @Test
     @Order(1)
     public void testCreateDirector() {
         Director director = Director.builder().name("Test director").build();
-        directorDao.create(director);
+        directorDao.add(director);
 
         assertThat(director)
                 .hasFieldOrPropertyWithValue("id", 1);
@@ -37,7 +38,7 @@ public class DirectorTests {
     @Test
     @Order(2)
     public void testGetDirector() {
-        Director director = directorDao.getById(1);
+        Director director = directorDao.findById(1).orElseThrow();
 
         assertThat(director)
                 .hasFieldOrPropertyWithValue("id", 1)
@@ -62,7 +63,7 @@ public class DirectorTests {
 
         assertThat(directors)
                 .hasSize(1)
-                .containsExactly(directorDao.getById(1));
+                .containsExactly(directorDao.findById(1).orElseThrow());
     }
 
     @Test
@@ -70,9 +71,8 @@ public class DirectorTests {
     public void testDeleteDirector() {
         directorDao.delete(1);
 
-        Exception exception = assertThrows(NotFoundException.class, () -> {
-            directorDao.getById(1);
-        });
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> directorService.getById(1));
 
         assertThat(exception.getMessage())
                 .contains("Director with id: 1 not found in DB");

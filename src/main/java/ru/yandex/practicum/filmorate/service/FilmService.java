@@ -11,11 +11,14 @@ import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static ru.yandex.practicum.filmorate.model.enums.EventType.LIKE;
 import static ru.yandex.practicum.filmorate.model.enums.Operation.ADD;
 import static ru.yandex.practicum.filmorate.model.enums.Operation.REMOVE;
+
+import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -26,6 +29,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final LikesDao likesDao;
     private final FeedService feedService;
+    private final DirectorService directorService;
 
     public Collection<Film> findAll() {
         return filmStorage.findAll();
@@ -58,12 +62,22 @@ public class FilmService {
         feedService.add(id, userId, LIKE, REMOVE);
     }
 
-    public Collection<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+    public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         return likesDao.getPopular(count, genreId, year);
     }
 
-    public Collection<Film> getFilmsByDirector(Integer directorId, String sortParam) {
-        return filmStorage.getSorted(directorId, sortParam);
+    public List<Film> getByDirectorId(Integer directorId, String sortParam) {
+        List<Film> films;
+
+        directorService.getById(directorId);
+
+        if (sortParam.equals("year")) {
+            films = filmStorage.findByDirectorIdSortedByYear(directorId);
+        } else if (sortParam.equals("likes")) {
+            films = filmStorage.findByDirectorIdSortedByLikes(directorId);
+        } else throw new ValidationException(format("Incorrect parameters value: %s", sortParam));
+
+        return films;
     }
 
     public Collection<Film> search(String query, String groupBy) {

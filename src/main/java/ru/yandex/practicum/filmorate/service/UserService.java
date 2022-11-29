@@ -70,8 +70,9 @@ public class UserService {
         userStorage.deleteById(id);
     }
 
-    public Collection<Film> getRecommendedFilm(Integer id) {
-        return likesDao.getRecommendedFilm(id);
+    public List<Film> getRecommendedFilm(Integer id) {
+        Integer recommendedId = likesDao.getUsersWithMaximumIntersectionLikes(id);
+        return likesDao.getRecommendedFilm(id, recommendedId);
     }
 
     public void checkUserExist(Integer id) {

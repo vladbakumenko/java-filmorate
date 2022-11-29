@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
@@ -29,7 +28,7 @@ public class ReviewService {
     public Review add(Review review) {
         throwIfReviewNotValid(review);
 
-        Review rw = reviewDao.create(review).get();
+        Review rw = reviewDao.add(review);
         feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, Operation.ADD);
         return rw;
     }
@@ -37,38 +36,37 @@ public class ReviewService {
     public Review update(Review review) {
         throwIfReviewNotValid(review);
 
-        Review rw = reviewDao.findById(review.getReviewId()).orElseThrow(()->new NotFoundException("Отзыв не найден"));
+        Review rw = reviewDao.findById(review.getReviewId()).orElseThrow(() -> new NotFoundException("Отзыв не найден"));
         feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, UPDATE);
-        return reviewDao.update(review).get();
+        return reviewDao.update(review);
     }
 
     public void delete(Integer id) {
-        Review rw = reviewDao.findById(id).orElseThrow(()-> new NotFoundException("Отзыв не найден"));
+        Review rw = reviewDao.findById(id).orElseThrow(() -> new NotFoundException("Отзыв не найден"));
         reviewDao.delete(id);
 
         feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, REMOVE);
     }
 
     public void addLikeReview(Integer reviewId, Integer userId) {
-        reviewDao.addLikeReview(reviewId, userId);
-
+        reviewDao.addLike(reviewId, userId);
     }
 
-    public void addDislikeReview(Integer reviewId, Integer userId) {
-        reviewDao.addDislikeReview(reviewId, userId);
+    public void addDislike(Integer reviewId, Integer userId) {
+        reviewDao.addDislike(reviewId, userId);
     }
 
-    public void deleteLikeReview(Integer reviewId, Integer userId) {
-        reviewDao.deleteLikeReview(reviewId, userId);
+    public void deleteLike(Integer reviewId, Integer userId) {
+        reviewDao.deleteLike(reviewId, userId);
     }
 
-    public void deleteDislikeReview(Integer reviewId, Integer userId) {
-        reviewDao.deleteDislikeReview(reviewId, userId);
+    public void deleteDislike(Integer reviewId, Integer userId) {
+        reviewDao.deleteDislike(reviewId, userId);
     }
 
     public Review findById(Integer id) {
         log.info("Получение отзыва с id {}", id);
-        return reviewDao.findById(id).orElseThrow(()->new NotFoundException("Отзыв не найден"));
+        return reviewDao.findById(id).orElseThrow(() -> new NotFoundException("Отзыв не найден"));
     }
 
     public void throwIfReviewNotValid(Review review) {

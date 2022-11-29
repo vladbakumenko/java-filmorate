@@ -23,12 +23,11 @@ public class ReviewDao implements ReviewStorage {
     @Override
     public Optional<Review> findById(Integer id) {
         String sql = "SELECT * FROM reviews WHERE id =?";
-        return jdbcTemplate.query(sql,reviewRowMapper,id).stream().findFirst();
-
+        return jdbcTemplate.query(sql, reviewRowMapper, id).stream().findFirst();
     }
 
     @Override
-    public Optional<Review> create(Review review) {
+    public Review add(Review review) {
         String sql = "INSERT INTO reviews(content,is_positive,id_user,id_film,useful) VALUES(?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
@@ -42,17 +41,14 @@ public class ReviewDao implements ReviewStorage {
         }, keyHolder);
         Integer id = keyHolder.getKey().intValue();
         review.setReviewId(id);
-        return Optional.of(review);
+        return review;
     }
 
     @Override
-    public Optional<Review> update(Review review) {
-        String sql = "UPDATE reviews SET content = ?," +
-                "is_positive = ? WHERE id = ?";
-        jdbcTemplate.update(sql, review.getContent(),
-                review.getIsPositive(),
-                review.getReviewId());
-        return Optional.of(review);
+    public Review update(Review review) {
+        String sql = "UPDATE reviews SET content = ?," + "is_positive = ? WHERE id = ?";
+        jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getReviewId());
+        return review;
     }
 
     @Override
@@ -65,35 +61,31 @@ public class ReviewDao implements ReviewStorage {
     public List<Review> findAll(Integer filmId, Integer count) {
         if (filmId != null) {
             String sql = "SELECT * FROM reviews WHERE id_film = ? ORDER BY useful DESC ";
-            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper /*(rs, rowNum) -> makeReview(rs)*/
-                            , filmId).
-                    stream().
-                    limit(count).
-                    collect(Collectors.toList());
+            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper, filmId).stream().limit(count).collect(Collectors.toList());
             return reviews;
         } else {
             String sql = "SELECT * FROM reviews ORDER BY useful DESC ";
-            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper /*(rs, rowNum) -> makeReview(rs)*/);
+            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper);
             return reviews.stream().limit(count).collect(Collectors.toList());
         }
     }
 
-    public void addLikeReview(Integer reviewId, Integer userId) {
+    public void addLike(Integer reviewId, Integer userId) {
         String sql = "UPDATE reviews SET useful = useful + 1 WHERE id = ?";
         jdbcTemplate.update(sql, reviewId);
     }
 
-    public void addDislikeReview(Integer reviewId, Integer userId) {
+    public void addDislike(Integer reviewId, Integer userId) {
         String sql = "UPDATE reviews SET useful = useful-1 WHERE id = ?";
         jdbcTemplate.update(sql, reviewId);
     }
 
-    public void deleteLikeReview(Integer reviewId, Integer userId) {
+    public void deleteLike(Integer reviewId, Integer userId) {
         String sql1 = "UPDATE reviews SET useful -= ? WHERE id = ?";
         jdbcTemplate.update(sql1, reviewId);
     }
 
-    public void deleteDislikeReview(Integer reviewId, Integer userId) {
+    public void deleteDislike(Integer reviewId, Integer userId) {
         String sql1 = "UPDATE reviews SET useful = (useful + 1) WHERE id = ?";
         jdbcTemplate.update(sql1, reviewId);
     }

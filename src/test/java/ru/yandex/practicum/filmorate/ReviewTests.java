@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.storage.dao.FilmsDao;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewDao;
 import ru.yandex.practicum.filmorate.storage.dao.UsersDao;
@@ -29,6 +30,7 @@ public class ReviewTests {
     private final ReviewDao reviewDao;
     private final UsersDao usersDao;
     private final FilmsDao filmsDao;
+    private final ReviewService reviewService;
 
     @BeforeAll
     @Test
@@ -51,14 +53,14 @@ public class ReviewTests {
                 userId(1).
                 filmId(1)
                 .useful(0).build();
-        reviewDao.create(review);
+        reviewDao.add(review);
         assertThat(review).hasFieldOrPropertyWithValue("reviewId", 1);
     }
 
     @Test
     @Order(2)
     public void testGetReview() {
-        Review review = reviewDao.getById(1);
+        Review review = reviewDao.findById(1).get();
         assertThat(review).
                 hasFieldOrPropertyWithValue("reviewId", 1).
                 hasFieldOrPropertyWithValue("content", "test content");
@@ -70,17 +72,15 @@ public class ReviewTests {
         Review updateReview = Review.builder().reviewId(1).content("content").isPositive(false).useful(1).build();
         reviewDao.update(updateReview);
         assertThat(updateReview).hasFieldOrPropertyWithValue("reviewId", 1);
-
     }
 
     @Test
     @Order(5)
     public void testDeleteReview() {
-        reviewDao.removeReviewById(1);
+        reviewDao.delete(1);
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            reviewDao.getById(1);
+            reviewService.findById(1);
         });
-        assertThat(exception.getMessage()).contains("Review with id: " + 1 + " not found");
+        assertThat(exception.getMessage()).contains("Отзыв не найден");
     }
-
 }

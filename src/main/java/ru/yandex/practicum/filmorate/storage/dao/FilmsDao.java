@@ -52,7 +52,8 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public Film create(Film film) {
-        String sql = "INSERT INTO films(name, description, releasedate, duration, mpa)" + " VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO films(name, description, releasedate, duration, mpa)" +
+                " VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -106,9 +107,11 @@ public class FilmsDao implements FilmStorage {
     public Film update(Film film) {
         Film oldFilm = getById(film.getId());
 
-        String sql = "UPDATE films SET name = ?, description = ?, releasedate = ?, duration = ?," + " mpa = ? WHERE id = ?";
+        String sql = "UPDATE films SET name = ?, description = ?, releasedate = ?, duration = ?," +
+                " mpa = ? WHERE id = ?";
 
-        jdbcTemplate.update(sql, film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()), film.getDuration(), film.getMpa().getId(), film.getId());
+        jdbcTemplate.update(sql, film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()),
+                film.getDuration(), film.getMpa().getId(), film.getId());
 
         if (!Objects.equals(film.getGenres(), oldFilm.getGenres())) {
             String sql2 = "DELETE FROM film_genres WHERE id_film = ?";
@@ -149,16 +152,27 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public List<Film> findByDirectorIdSortedByYear(Integer directorId) {
-        String sqlQuery = "SELECT * FROM films f " + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) " + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
+        String sqlQuery = "SELECT * FROM films f "
+                + "WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?) "
+                + "ORDER BY EXTRACT(YEAR FROM releasedate) ASC";
 
-        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId).stream().map(film -> getById(film.getId())).collect(toList());
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
+                .stream()
+                .map(film -> getById(film.getId()))
+                .collect(toList());
     }
 
     @Override
     public List<Film> findByDirectorIdSortedByLikes(Integer directorId) {
-        String sqlQuery = "SELECT * FROM " + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) " + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l " + "ORDER BY likes_count ASC";
+        String sqlQuery = "SELECT * FROM "
+                + "(SELECT * FROM films f WHERE f.id IN (SELECT film_id FROM film_directors WHERE director_id = ?)) "
+                + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l "
+                + "ORDER BY likes_count ASC";
 
-        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId).stream().map(film -> getById(film.getId())).collect(toList());
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
+                .stream()
+                .map(film -> getById(film.getId()))
+                .collect(toList());
     }
 
     @Override
@@ -166,14 +180,16 @@ public class FilmsDao implements FilmStorage {
         String sql;
         switch (groupBy) {
             case "title":
-                sql = "SELECT * FROM films AS f WHERE locate(?, lower(name)) > 0";
+                sql = "select * from films as f where locate(?, lower(name)) > 0";
                 return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
             case "director":
-                sql = "SELECT * FROM films AS f, film_directors AS fd, directors AS d " + "WHERE f.id = fd.film_id AND fd.director_id = d.id AND locate(?, lower(d.name)) > 0";
+                sql = "select * from films as f, film_directors as fd, directors as d " +
+                        "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
                 return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
             case "director,title":
             case "title,director":
-                sql = "SELECT * FROM films AS f, film_directors AS fd, directors AS d " + "WHERE (locate(?, lower(f.name)) > 0 OR (f.id = fd.film_id AND fd.director_id = d.id AND locate(?, lower(d.name)) > 0))";
+                sql = "select * from films as f, film_directors as fd, directors as d " +
+                        "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
                 List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase(), query.toLowerCase());
                 HashSet<Film> uniqueList = new HashSet<>(ans);
                 ans = new ArrayList<>();
@@ -187,6 +203,7 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public void deleteById(Integer id) {
+        log.info("Request to delete film with id: {}", id);
         String sql = "DELETE FROM films WHERE id = ?";
         try {
             jdbcTemplate.update(sql, id);
@@ -200,7 +217,10 @@ public class FilmsDao implements FilmStorage {
         userStorage.checkUserExist(userId);
         userStorage.checkUserExist(friendId);
 
-        String sql = "SELECT * FROM films f WHERE id IN " + "(SELECT l1.id_film FROM likes_by_users l1, likes_by_users l2 " + "WHERE l1.id_film = l2.id_film AND l1.id_user = ? AND l2.id_user = ? " + "GROUP BY l1.id_film ORDER BY COUNT(l1.id_user) DESC)";
+        String sql = "SELECT * FROM films f WHERE id IN " +
+                "(SELECT l1.id_film FROM likes_by_users l1, likes_by_users l2 " +
+                "WHERE l1.id_film = l2.id_film AND l1.id_user = ? AND l2.id_user = ? " +
+                "GROUP BY l1.id_film ORDER BY COUNT(l1.id_user) DESC)";
 
         return jdbcTemplate.query(sql, (rs, rowMap) -> makeFilm(rs), userId, friendId);
     }
@@ -222,12 +242,14 @@ public class FilmsDao implements FilmStorage {
     private void setFilmDirectors(Film film) {
         String sqlQuery = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
 
-        film.getDirectors().forEach(director -> jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery);
-            stmt.setLong(1, film.getId());
-            stmt.setInt(2, director.getId());
-            return stmt;
-        }));
+        film.getDirectors()
+                .forEach(director ->
+                        jdbcTemplate.update(connection -> {
+                            PreparedStatement stmt = connection.prepareStatement(sqlQuery);
+                            stmt.setLong(1, film.getId());
+                            stmt.setInt(2, director.getId());
+                            return stmt;
+                        }));
     }
 
     private void deleteFilmDirectors(Film film) {
@@ -237,7 +259,18 @@ public class FilmsDao implements FilmStorage {
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
-        LocalDate releaseDate = rs.getDate("releaseDate") == null ? null : rs.getDate("releaseDate").toLocalDate();
-        return Film.builder().id(rs.getInt("id")).name(rs.getString("name")).description(rs.getString("description")).releaseDate(releaseDate).duration(rs.getInt("duration")).mpa(mpaService.getById(rs.getInt("mpa"))).genres(getGenresByFilmId(rs.getInt("id"))).directors(getDirectorsByFilmId(rs.getInt("id"))).build();
+        LocalDate releaseDate =
+                rs.getDate("releaseDate") == null ?
+                        null : rs.getDate("releaseDate").toLocalDate();
+        return Film.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .releaseDate(releaseDate)
+                .duration(rs.getInt("duration"))
+                .mpa(mpaService.getById(rs.getInt("mpa")))
+                .genres(getGenresByFilmId(rs.getInt("id")))
+                .directors(getDirectorsByFilmId(rs.getInt("id")))
+                .build();
     }
 }

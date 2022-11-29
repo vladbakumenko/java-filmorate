@@ -1,18 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -22,18 +21,13 @@ public class ReviewDao implements ReviewStorage {
     private final RowMapper<Review> reviewRowMapper;
 
     @Override
-    public Review getById(Integer id) {
+    public Optional<Review> findById(Integer id) {
         String sql = "SELECT * FROM reviews WHERE id =?";
-        try {
-            return jdbcTemplate.queryForObject(sql,
-                    reviewRowMapper, id);
-        } catch (DataAccessException da) {
-            throw new NotFoundException("Review with id: " + id + " not found");
-        }
+        return jdbcTemplate.query(sql, reviewRowMapper, id).stream().findFirst();
     }
 
     @Override
-    public Review create(Review review) {
+    public Review add(Review review) {
         String sql = "INSERT INTO reviews(content,is_positive,id_user,id_film,useful) VALUES(?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
@@ -52,16 +46,13 @@ public class ReviewDao implements ReviewStorage {
 
     @Override
     public Review update(Review review) {
-        String sql = "UPDATE reviews SET content = ?," +
-                "is_positive = ? WHERE id = ?";
-        jdbcTemplate.update(sql, review.getContent(),
-                review.getIsPositive(),
-                review.getReviewId());
+        String sql = "UPDATE reviews SET content = ?," + "is_positive = ? WHERE id = ?";
+        jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getReviewId());
         return review;
     }
 
     @Override
-    public void removeReviewById(Integer id) {
+    public void delete(Integer id) {
         String sql = "DELETE FROM reviews WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
@@ -70,35 +61,31 @@ public class ReviewDao implements ReviewStorage {
     public List<Review> findAll(Integer filmId, Integer count) {
         if (filmId != null) {
             String sql = "SELECT * FROM reviews WHERE id_film = ? ORDER BY useful DESC ";
-            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper /*(rs, rowNum) -> makeReview(rs)*/
-                            , filmId).
-                    stream().
-                    limit(count).
-                    collect(Collectors.toList());
+            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper, filmId).stream().limit(count).collect(Collectors.toList());
             return reviews;
         } else {
             String sql = "SELECT * FROM reviews ORDER BY useful DESC ";
-            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper /*(rs, rowNum) -> makeReview(rs)*/);
+            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper);
             return reviews.stream().limit(count).collect(Collectors.toList());
         }
     }
 
-    public void addLikeReview(Integer reviewId, Integer userId) {
+    public void addLike(Integer reviewId, Integer userId) {
         String sql = "UPDATE reviews SET useful = useful + 1 WHERE id = ?";
         jdbcTemplate.update(sql, reviewId);
     }
 
-    public void addDislikeReview(Integer reviewId, Integer userId) {
+    public void addDislike(Integer reviewId, Integer userId) {
         String sql = "UPDATE reviews SET useful = useful-1 WHERE id = ?";
         jdbcTemplate.update(sql, reviewId);
     }
 
-    public void removeLikeReview(Integer reviewId, Integer userId) {
+    public void deleteLike(Integer reviewId, Integer userId) {
         String sql1 = "UPDATE reviews SET useful -= ? WHERE id = ?";
         jdbcTemplate.update(sql1, reviewId);
     }
 
-    public void removeDislikeReview(Integer reviewId, Integer userId) {
+    public void deleteDislike(Integer reviewId, Integer userId) {
         String sql1 = "UPDATE reviews SET useful = (useful + 1) WHERE id = ?";
         jdbcTemplate.update(sql1, reviewId);
     }

@@ -60,23 +60,24 @@ public class LikesDao {
         return stream.map(Optional::orElseThrow).collect(toList());
     }
 
-    public List<Film> getRecommendedFilm(Integer idUser) {
-        Integer recommendedUserId = getUsersWithMaximumIntersectionLikes(idUser);
+    public List<Film> getRecommendedFilm(Integer idUser, Integer recommendedIdUser) {
+        log.info("Request to get recommended film from user with id: {}", idUser);
         String sql2 = "SELECT * FROM films AS f " +
-                "JOIN mpa AS m ON f.mpa = m.id " +
-                "WHERE f.id IN (" +
-                "    SELECT id_film FROM likes_by_users WHERE id_user = ? AND " +
-                "id_film NOT IN (SELECT id_film FROM likes_by_users WHERE id_user = ?))";
+                "   JOIN mpa AS m ON f.mpa = m.id " +
+                "   WHERE f.id IN (SELECT id_film FROM likes_by_users WHERE id_user = ? AND " +
+                "   id_film NOT IN (SELECT id_film FROM likes_by_users WHERE id_user = ?))";
         try {
             return new ArrayList<>(jdbcTemplate.query(sql2,
-                    (rs, rowNum) -> filmStorage.findById(rs.getInt("id")).orElseThrow(), recommendedUserId, idUser));
+                    (rs, rowNum) -> filmStorage.findById(rs.getInt("id")).orElseThrow(),
+                    recommendedIdUser, idUser));
         } catch (EmptyResultDataAccessException e) {
-            log.debug("No record found in database for " + recommendedUserId, e);
+            log.debug("No record found in database for " + recommendedIdUser, e);
             return null;
         }
     }
 
-    private Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
+    public Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
+        log.info("Request to get user with maximum intersection likes from user with id: {}", idUser);
         String sql = "SELECT l2.id_user AS recommended" +
                 "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
                 "   ON l1.id_film = l2.id_film " +

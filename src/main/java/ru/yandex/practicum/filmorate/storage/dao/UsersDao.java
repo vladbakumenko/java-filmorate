@@ -83,6 +83,7 @@ public class UsersDao implements UserStorage {
 
     @Override
     public void deleteById(Integer id) {
+        log.info("Request to delete user with id: {}", id);
         String sql = "DELETE FROM users where id = ?";
         jdbcTemplate.update(sql, id);
     }

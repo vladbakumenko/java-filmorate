@@ -200,6 +200,7 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public void deleteById(Integer id) {
+        log.info("Request to delete film with id: {}", id);
         String sql = "DELETE FROM films where id = ?";
         jdbcTemplate.update(sql, id);
     }

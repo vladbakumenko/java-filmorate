@@ -85,7 +85,8 @@ public class UserService {
     }
 
     public List<Film> getRecommendedFilm(Integer id) {
-        return likesDao.getRecommendedFilm(id);
+        Integer recommendedId = likesDao.getUsersWithMaximumIntersectionLikes(id);
+        return likesDao.getRecommendedFilm(id, recommendedId);
     }
 
     public void checkUserExist(Integer id) {

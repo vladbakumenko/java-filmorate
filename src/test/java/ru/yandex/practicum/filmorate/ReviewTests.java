@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -82,5 +81,4 @@ public class ReviewTests {
         });
         assertThat(exception.getMessage()).contains("Review with id: " + 1 + " not found");
     }
-
 }

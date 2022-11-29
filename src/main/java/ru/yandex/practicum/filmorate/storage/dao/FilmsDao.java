@@ -10,7 +10,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -18,7 +17,6 @@ import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -41,10 +39,9 @@ public class FilmsDao implements FilmStorage {
     private final MpaService mpaService;
     private final GenreService genreService;
     private final DirectorService directorService;
-    private final UserStorage userStorage;
 
     @Override
-    public Collection<Film> findAll() {
+    public List<Film> findAll() {
         String sql = "SELECT * FROM films";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
@@ -105,7 +102,7 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        Film oldFilm = getById(film.getId());
+        Film oldFilm = findById(film.getId()).orElseThrow();
 
         String sql = "UPDATE films SET name = ?, description = ?, releasedate = ?, duration = ?," +
                 " mpa = ? WHERE id = ?";
@@ -140,13 +137,13 @@ public class FilmsDao implements FilmStorage {
     }
 
     @Override
-    public Film getById(Integer id) {
+    public Optional<Film> findById(Integer id) {
         String sql = "SELECT * FROM films WHERE id = ?";
 
         try {
-            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id));
         } catch (DataAccessException e) {
-            throw new NotFoundException(String.format("Film with id: %d not found", id));
+            return Optional.empty();
         }
     }
 
@@ -158,7 +155,7 @@ public class FilmsDao implements FilmStorage {
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
                 .stream()
-                .map(film -> getById(film.getId()))
+                .map(film -> findById(film.getId()).orElseThrow())
                 .collect(toList());
     }
 
@@ -171,7 +168,7 @@ public class FilmsDao implements FilmStorage {
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), directorId)
                 .stream()
-                .map(film -> getById(film.getId()))
+                .map(film -> findById(film.getId()).orElseThrow())
                 .collect(toList());
     }
 
@@ -204,19 +201,12 @@ public class FilmsDao implements FilmStorage {
     @Override
     public void deleteById(Integer id) {
         log.info("Request to delete film with id: {}", id);
-        String sql = "DELETE FROM films WHERE id = ?";
-        try {
-            jdbcTemplate.update(sql, id);
-        } catch (DataAccessException e) {
-            throw new NotFoundException(String.format("Film with id: %d not found", id));
-        }
+        String sql = "DELETE FROM films where id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
-    public Collection<Film> getCommonFilms(Integer userId, Integer friendId) {
-        userStorage.checkUserExist(userId);
-        userStorage.checkUserExist(friendId);
-
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         String sql = "SELECT * FROM films f WHERE id IN " +
                 "(SELECT l1.id_film FROM likes_by_users l1, likes_by_users l2 " +
                 "WHERE l1.id_film = l2.id_film AND l1.id_user = ? AND l2.id_user = ? " +

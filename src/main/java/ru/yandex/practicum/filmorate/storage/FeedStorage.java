@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface FeedStorage {
 
-    List<Feed> getByUserId(int id);
+    List<Feed> findByUserId(int id);
 
     void addFeed(int idEntity, int idUser, long timestamp, EventType eventType, Operation operation);
 }

@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -15,19 +15,18 @@ public class GenreDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public Genre getGenreById(int idGenre) {
+    public Optional<Genre> findGenreById(int idGenre) {
         String sql = "SELECT id, name FROM genres WHERE id = ?";
 
         try {
-            return jdbcTemplate.queryForObject(sql,
-                    (rs, rowNum) -> new Genre(rs.getInt("id"), rs.getString("name")),
-                    idGenre);
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
+                    (rs, rowNum) -> new Genre(rs.getInt("id"), rs.getString("name")), idGenre));
         } catch (DataAccessException e) {
-            throw new NotFoundException(String.format("Genre with id: %d not found in DB", idGenre));
+            return Optional.empty();
         }
     }
 
-    public Collection<Genre> findAll() {
+    public List<Genre> findAll() {
         String sql = "SELECT id, name FROM genres";
 
         return jdbcTemplate.query(sql,

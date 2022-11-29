@@ -7,10 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,12 +21,9 @@ public class LikesDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
 
     public void addLike(Integer idFilm, Integer idUser) {
-        filmStorage.getById(idFilm);
-        userStorage.checkUserExist(idUser);
-
+        filmStorage.findById(idFilm);
         removeLike(idFilm, idUser);
 
         String sql = "insert into likes_by_users(id_film, id_user) values (?, ?)";
@@ -37,8 +32,7 @@ public class LikesDao {
     }
 
     public void removeLike(Integer idFilm, Integer idUser) {
-        filmStorage.getById(idFilm);
-        userStorage.checkUserExist(idUser);
+        filmStorage.findById(idFilm);
 
         String sql = "delete from likes_by_users where id_film = ? and id_user = ?";
         jdbcTemplate.update(sql, idFilm, idUser);
@@ -51,19 +45,19 @@ public class LikesDao {
                 + "order by l.likes_count desc limit ?";
 
         var stream = jdbcTemplate
-                .query(sqlQuery, (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), count)
+                .query(sqlQuery, (rs, rowNum) -> filmStorage.findById(rs.getInt("id")), count)
                 .stream()
-                .map(film -> filmStorage.getById(film.getId()));
+                .map(film -> filmStorage.findById(film.orElseThrow().getId()));
 
         if (year.isPresent()) {
-            stream = stream.filter(film -> film.getReleaseDate().getYear() == year.get());
+            stream = stream.filter(film -> film.orElseThrow().getReleaseDate().getYear() == year.get());
         }
         if (genreId.isPresent()) {
-            stream = stream.filter(film -> film.getGenres()
+            stream = stream.filter(film -> film.orElseThrow().getGenres()
                     .stream().anyMatch(genre -> genre.getId() == genreId.get()));
         }
 
-        return stream.collect(toList());
+        return stream.map(Optional::orElseThrow).collect(toList());
     }
 
     public List<Film> getRecommendedFilm(Integer idUser, Integer recommendedIdUser) {
@@ -74,7 +68,8 @@ public class LikesDao {
                 "   id_film NOT IN (SELECT id_film FROM likes_by_users WHERE id_user = ?))";
         try {
             return new ArrayList<>(jdbcTemplate.query(sql2,
-                    (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), recommendedIdUser, idUser));
+                    (rs, rowNum) -> filmStorage.findById(rs.getInt("id")).orElseThrow(),
+                    recommendedIdUser, idUser));
         } catch (EmptyResultDataAccessException e) {
             log.debug("No record found in database for " + recommendedIdUser, e);
             return null;

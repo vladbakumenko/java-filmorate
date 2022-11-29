@@ -58,7 +58,7 @@ public class FeedTests {
 
         feed.setEventId(1);
 
-        assertTrue(feedStorage.getByUserId(1).contains(feed));
+        assertTrue(feedStorage.findByUserId(1).contains(feed));
     }
 
     @Test
@@ -72,6 +72,6 @@ public class FeedTests {
                 .build();
         userStorage.create(user);
 
-        assertTrue(feedStorage.getByUserId(2).isEmpty());
+        assertTrue(feedStorage.findByUserId(2).isEmpty());
     }
 }

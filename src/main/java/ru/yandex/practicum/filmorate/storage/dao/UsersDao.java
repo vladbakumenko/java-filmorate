@@ -15,7 +15,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -26,7 +26,7 @@ public class UsersDao implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Collection<User> findAll() {
+    public List<User> findAll() {
         String sql = "SELECT * FROM users";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs));
@@ -55,8 +55,6 @@ public class UsersDao implements UserStorage {
 
     @Override
     public User update(User user) {
-        checkUserExist(user.getId());
-
         String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
 
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(),
@@ -66,7 +64,7 @@ public class UsersDao implements UserStorage {
     }
 
     @Override
-    public User getById(Integer id) {
+    public User findById(Integer id) {
         String sql = "SELECT * FROM users WHERE id = ?";
 
         try {
@@ -77,25 +75,17 @@ public class UsersDao implements UserStorage {
     }
 
     @Override
-    public void checkUserExist(Integer id) {
+    public Boolean checkUserExist(Integer id) {
         String sql = "SELECT exists (SELECT * FROM users WHERE id = ?)";
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
-
-        if (!exists) {
-            throw new NotFoundException(String.format("User with id: %d not found in DB", id));
-        }
+        return jdbcTemplate.queryForObject(sql, Boolean.class, id);
     }
 
     @Override
     public void deleteById(Integer id) {
         log.info("Request to delete user with id: {}", id);
         String sql = "DELETE FROM users where id = ?";
-        try {
-            jdbcTemplate.update(sql, id);
-        } catch (DataAccessException e) {
-            throw new NotFoundException(String.format("User with id: %d not found", id));
-        }
+        jdbcTemplate.update(sql, id);
     }
 
     public User makeUser(ResultSet rs) throws SQLException {

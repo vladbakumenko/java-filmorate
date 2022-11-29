@@ -26,6 +26,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.MpaService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
@@ -36,11 +40,15 @@ import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 public class FilmoRateApplicationTests {
     private final DirectorStorage directorStorage;
     private final UsersDao userStorage;
+    private final UserService userService;
     private final FilmsDao filmStorage;
+    private final FilmService filmService;
     private final FriendsDao friendsDao;
     private final GenreDao genreDao;
+    private final GenreService genreService;
     private final LikesDao likesDao;
     private final MpaDao mpaDao;
+    private final MpaService mpaService;
     private final JdbcTemplate jdbcTemplate;
     private User user;
     private Film film;
@@ -88,7 +96,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testFindUserById() {
-        User testUser = userStorage.getById(1);
+        User testUser = userStorage.findById(1);
 
         assertThat(testUser).hasFieldOrPropertyWithValue("id", 1);
 
@@ -98,7 +106,7 @@ public class FilmoRateApplicationTests {
     @Test
     public void testFindUserWithWrongId() {
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            userStorage.getById(100);
+            userStorage.findById(100);
         });
 
         assertEquals(e.getMessage(), "User with id: 100 not found in DB");
@@ -125,7 +133,7 @@ public class FilmoRateApplicationTests {
 
         assertThat(userTest).hasFieldOrPropertyWithValue("id", 2);
 
-        assertEquals(userTest, userStorage.getById(2));
+        assertEquals(userTest, userStorage.findById(2));
     }
 
     @Test
@@ -142,7 +150,7 @@ public class FilmoRateApplicationTests {
 
         assertThat(userTest).hasFieldOrPropertyWithValue("id", 2);
 
-        assertEquals(userTest, userStorage.getById(2));
+        assertEquals(userTest, userStorage.findById(2));
     }
 
     @Test
@@ -159,7 +167,7 @@ public class FilmoRateApplicationTests {
 
         assertThat(userTest).hasFieldOrPropertyWithValue("id", 1);
 
-        assertEquals(userTest, userStorage.getById(1));
+        assertEquals(userTest, userStorage.findById(1));
     }
 
     @Test
@@ -173,25 +181,27 @@ public class FilmoRateApplicationTests {
                 .build();
 
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            userStorage.update(userTest);
+            userService.update(userTest);
         });
 
-        assertEquals(e.getMessage(), "User with id: 100 not found in DB");
+        assertEquals(e.getMessage(), "User with id: 100 not found");
     }
 
     @Test
     public void testFindFilmById() {
-        Film testFilm = filmStorage.getById(1);
+        Optional<Film> optionalFilm = filmStorage.findById(1);
 
-        assertThat(testFilm).hasFieldOrPropertyWithValue("id", 1);
+        assertThat(optionalFilm)
+                .isPresent()
+                .hasValueSatisfying(film -> assertThat(film).hasFieldOrPropertyWithValue("id", 1));
 
-        assertEquals(film, testFilm);
+        assertEquals(film, optionalFilm.orElseThrow());
     }
 
     @Test
     public void testFindFilmWithWrongId() {
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            filmStorage.getById(100);
+            filmService.getById(100);
         });
 
         assertEquals(e.getMessage(), "Film with id: 100 not found");
@@ -221,7 +231,7 @@ public class FilmoRateApplicationTests {
 
         assertThat(testFilm).hasFieldOrPropertyWithValue("id", 2);
 
-        assertEquals(testFilm, filmStorage.getById(2));
+        assertEquals(testFilm, filmStorage.findById(2).orElseThrow());
     }
 
     @Test
@@ -241,7 +251,7 @@ public class FilmoRateApplicationTests {
 
         assertThat(testFilm).hasFieldOrPropertyWithValue("id", 2);
 
-        assertEquals(testFilm, filmStorage.getById(2));
+        assertEquals(testFilm, filmStorage.findById(2).orElseThrow());
     }
 
     @Test
@@ -261,7 +271,7 @@ public class FilmoRateApplicationTests {
 
         assertThat(testFilm).hasFieldOrPropertyWithValue("id", 1);
 
-        assertEquals(testFilm, filmStorage.getById(1));
+        assertEquals(testFilm, filmStorage.findById(1).orElseThrow());
     }
 
     @Test
@@ -277,7 +287,7 @@ public class FilmoRateApplicationTests {
                 .build();
 
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            filmStorage.update(testFilm);
+            filmService.update(testFilm);
         });
 
         assertEquals(e.getMessage(), "Film with id: 100 not found");
@@ -296,16 +306,16 @@ public class FilmoRateApplicationTests {
 
         friendsDao.addFriend(user.getId(), userTest.getId());
 
-        assertTrue(friendsDao.getFriends(user.getId()).contains(userTest));
+        assertTrue(friendsDao.findFriends(user.getId()).contains(userTest));
     }
 
     @Test
     public void testAddFriendWithWrongId() {
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            friendsDao.addFriend(1, 100);
+            userService.addFriend(1, 100);
         });
 
-        assertEquals(e.getMessage(), "User with id: 100 not found in DB");
+        assertEquals(e.getMessage(), "User with id: 100 not found");
     }
 
     @Test
@@ -323,7 +333,7 @@ public class FilmoRateApplicationTests {
 
         friendsDao.removeFriend(user.getId(), userTest.getId());
 
-        assertFalse(friendsDao.getFriends(user.getId()).contains(userTest));
+        assertFalse(friendsDao.findFriends(user.getId()).contains(userTest));
     }
 
     @Test
@@ -339,7 +349,7 @@ public class FilmoRateApplicationTests {
 
         friendsDao.addFriend(user.getId(), userTest.getId());
 
-        assertEquals(friendsDao.getFriends(user.getId()), List.of(userTest));
+        assertEquals(friendsDao.findFriends(user.getId()), List.of(userTest));
     }
 
     @Test
@@ -366,24 +376,30 @@ public class FilmoRateApplicationTests {
 
         friendsDao.addFriend(userTest2.getId(), userTest.getId());
 
-        assertEquals(friendsDao.getCommonFriends(user.getId(), userTest2.getId()), List.of(userTest));
+        assertEquals(friendsDao.findCommonFriends(user.getId(), userTest2.getId()), List.of(userTest));
     }
 
     @Test
     public void testGetGenreById() {
-        Genre genre = genreDao.getGenreById(1);
+        Optional<Genre> optionalGenre = genreDao.findGenreById(1);
 
-        assertThat(genre).hasFieldOrPropertyWithValue("id", 1);
-        assertThat(genre).hasFieldOrPropertyWithValue("name", "Комедия");
+        assertThat(optionalGenre)
+                .isPresent()
+                .hasValueSatisfying(genre -> assertThat(genre).hasFieldOrPropertyWithValue("id", 1));
+
+        assertThat(optionalGenre)
+                .isPresent()
+                .hasValueSatisfying(genre -> assertThat(genre)
+                        .hasFieldOrPropertyWithValue("name", "Комедия"));
     }
 
     @Test
     public void testGetGenreByIdWithWrongId() {
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            genreDao.getGenreById(10);
+            genreService.getById(10);
         });
 
-        assertEquals(e.getMessage(), "Genre with id: 10 not found in DB");
+        assertEquals(e.getMessage(), "Genre with id: 10 not found");
     }
 
     @Test
@@ -466,19 +482,26 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testGetMpaById() {
-        Mpa mpa = mpaDao.getMpaById(1);
+        Optional<Mpa> optionalMpa = mpaDao.findMpaById(1);
 
-        assertThat(mpa).hasFieldOrPropertyWithValue("id", 1);
-        assertThat(mpa).hasFieldOrPropertyWithValue("name", "G");
+        assertThat(optionalMpa)
+                .isPresent()
+                .hasValueSatisfying(mpa ->
+                        assertThat(mpa).hasFieldOrPropertyWithValue("id", 1));
+
+        assertThat(optionalMpa)
+                .isPresent()
+                .hasValueSatisfying(mpa ->
+                        assertThat(mpa).hasFieldOrPropertyWithValue("name", "G"));
     }
 
     @Test
     public void testGetMpaByIdWithWrongId() {
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            mpaDao.getMpaById(10);
+            mpaService.getById(10);
         });
 
-        assertEquals(e.getMessage(), "Rating MPA with id: 10 not found in DB");
+        assertEquals(e.getMessage(), "MPA with id: 10 not found");
     }
 
     @Test

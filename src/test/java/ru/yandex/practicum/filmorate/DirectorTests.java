@@ -29,9 +29,9 @@ public class DirectorTests {
     @Order(1)
     public void testCreateDirector() {
         Director director = Director.builder().name("Test director").build();
-        directorDao.add(director);
+        var createdDirector = directorDao.add(director).orElseThrow();
 
-        assertThat(director)
+        assertThat(createdDirector)
                 .hasFieldOrPropertyWithValue("id", 1);
     }
 
@@ -48,8 +48,8 @@ public class DirectorTests {
     @Test
     @Order(3)
     public void testUpdateDirector() {
-        Director updatedDirector = Director.builder().id(1).name("Updated director").build();
-        directorDao.update(updatedDirector);
+        Director directorForUpdate = Director.builder().id(1).name("Updated director").build();
+        Director updatedDirector = directorDao.update(directorForUpdate).orElseThrow();
 
         assertThat(updatedDirector)
                 .hasFieldOrPropertyWithValue("id", 1)

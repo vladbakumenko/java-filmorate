@@ -22,6 +22,6 @@ public class FeedService {
     }
 
     public List<Feed> getByUserId(int id) {
-        return feedStorage.getByUserId(id);
+        return feedStorage.findByUserId(id);
     }
 }

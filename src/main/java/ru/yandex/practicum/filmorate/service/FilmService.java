@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,33 +30,43 @@ public class FilmService {
     private final LikesDao likesDao;
     private final FeedService feedService;
     private final DirectorService directorService;
+    private final UserService userService;
 
-    public Collection<Film> findAll() {
+    public List<Film> findAll() {
         return filmStorage.findAll();
     }
 
     public Film create(Film film) {
-        validFilm(film);
+        throwIfFilmNotValid(film);
         return filmStorage.create(film);
     }
 
     public Film update(Film film) {
-        validFilm(film);
+        getById(film.getId());
+        throwIfFilmNotValid(film);
         return filmStorage.update(film);
     }
 
     public Film getById(Integer id) {
-        return filmStorage.getById(id);
+        Optional<Film> optionalFilm = filmStorage.findById(id);
+
+        if (optionalFilm.isEmpty()) {
+            throw new NotFoundException(String.format("Film with id: %d not found", id));
+        }
+
+        return optionalFilm.get();
     }
 
 
     public void addLike(Integer id, Integer userId) {
+        userService.checkUserExist(userId);
         likesDao.addLike(id, userId);
 
         feedService.add(id, userId, LIKE, ADD);
     }
 
     public void removeLike(Integer id, Integer userId) {
+        userService.checkUserExist(userId);
         likesDao.removeLike(id, userId);
 
         feedService.add(id, userId, LIKE, REMOVE);
@@ -80,30 +90,29 @@ public class FilmService {
         return films;
     }
 
-    public Collection<Film> search(String query, String groupBy) {
+    public List<Film> search(String query, String groupBy) {
         return filmStorage.searchFilms(query, groupBy);
     }
 
     public void deleteById(Integer id) {
+        getById(id);
         filmStorage.deleteById(id);
     }
 
-    public Collection<Film> getCommonFilms(Integer userId, Integer friendId) {
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        userService.checkUserExist(userId);
+        userService.checkUserExist(friendId);
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
-    private void validFilm(Film film) {
+    private void throwIfFilmNotValid(Film film) {
         if (film.getName() == null || film.getName().isEmpty() || film.getName().isBlank()) {
-            log.warn("Попытка создания фильма с пустым названием");
             throw new BadRequestException("Название фильма не может быть пустым");
         } else if (film.getDescription().length() > 200) {
-            log.warn("Попытка создания фильма с описанием свыше 200 знаков");
             throw new BadRequestException("Описание фильма превышает максимальное количество знаков 200");
         } else if (film.getReleaseDate().isBefore(firstFilmBirthday)) {
-            log.warn("Попытка создания фильма с датой, предшествующей появлению первого фильма");
             throw new BadRequestException("Дата релиза фильма введена неверна");
         } else if (film.getDuration() <= 0) {
-            log.warn("Попытка создания фильма с отрицательной продолжительностью");
             throw new BadRequestException("Продолжительность фильма не может быть отрицательной");
         }
     }

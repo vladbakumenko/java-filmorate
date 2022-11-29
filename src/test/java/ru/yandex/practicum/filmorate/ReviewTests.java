@@ -33,7 +33,7 @@ public class ReviewTests {
     @BeforeAll
     @Test
     public void createUserAndFilm() {
-        usersDao.create(User.builder().id(1).name("user").email("test@mail.ru").
+        usersDao.create(User.builder().id(1).login("user").email("test@mail.ru").
                 birthday(LocalDate.of(1980, 12, 7)).build());
         filmsDao.create(Film.builder().
                 id(1).description("description").

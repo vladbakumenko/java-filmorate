@@ -16,14 +16,14 @@ import java.util.List;
 public class FeedDao implements FeedStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FeedMapper feedMapper;
+    private final FeedMapper feedRowMapper;
 
     @Override
-    public List<Feed> getByUserId(int id) {
+    public List<Feed> findByUserId(int id) {
 
         String sql = "select * from feed where id_user = ? order by timestamp asc";
 
-        return jdbcTemplate.query(sql, feedMapper, id);
+        return jdbcTemplate.query(sql, feedRowMapper, id);
     }
 
     @Override

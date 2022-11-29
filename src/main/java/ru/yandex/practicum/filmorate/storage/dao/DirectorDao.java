@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -40,7 +39,7 @@ public class DirectorDao implements DirectorStorage {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, directorRowMapper, id));
         } catch (DataAccessException e) {
-            log.error("No record found in database for " + id, e);
+            log.error("No record found in database for Director with id: " + id, e);
         }
         return Optional.empty();
     }
@@ -57,18 +56,18 @@ public class DirectorDao implements DirectorStorage {
         }, keyHolder);
 
         int id = requireNonNull(keyHolder.getKey()).intValue();
-        director.setId(id);
 
-        return Optional.of(director);
+        return findById(id);
     }
 
     @Override
     public Optional<Director> update(Director director) {
         String sql = "UPDATE directors SET name = ? WHERE id = ?";
+        int directorId = director.getId();
 
-        jdbcTemplate.update(sql, director.getName(), director.getId());
+        jdbcTemplate.update(sql, director.getName(), directorId);
 
-        return Optional.of(director);
+        return findById(directorId);
     }
 
     @Override

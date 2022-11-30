@@ -524,7 +524,7 @@ public class FilmoRateApplicationTests {
 
         testFilm = filmStorage.create(testFilm);
 
-        assertEquals(List.of(testFilm), filmStorage.searchFilms("search", "title"));
+        assertEquals(List.of(testFilm), filmStorage.searchByTitle("search"));
     }
 
     @Test
@@ -545,7 +545,7 @@ public class FilmoRateApplicationTests {
                 .build();
         testFilm = filmStorage.create(testFilm);
 
-        assertEquals(List.of(testFilm), filmStorage.searchFilms("search", "director"));
+        assertEquals(List.of(testFilm), filmStorage.searchByDirector("search"));
     }
 
     @Test
@@ -578,7 +578,7 @@ public class FilmoRateApplicationTests {
                 .build();
         testFilm2 = filmStorage.create(testFilm2);
 
-        assertEquals(List.of(testFilm2, testFilm), filmStorage.searchFilms("search", "director,title"));
+        assertEquals(List.of(testFilm2, testFilm), filmStorage.searchByTitleAndDirector("search"));
     }
 
     @Test
@@ -611,7 +611,7 @@ public class FilmoRateApplicationTests {
                 .build();
         testFilm2 = filmStorage.create(testFilm2);
 
-        assertEquals(List.of(testFilm2, testFilm), filmStorage.searchFilms("search", "director,title"));
+        assertEquals(List.of(testFilm2, testFilm), filmStorage.searchByTitleAndDirector("search"));
     }
 
     @Test

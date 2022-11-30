@@ -18,7 +18,11 @@ public interface FilmStorage {
 
     Film update(Film film);
 
-    List<Film> searchFilms(String query, String groupBy);
+    List<Film> searchByTitle(String query);
+
+    List<Film> searchByDirector(String query);
+
+    List<Film> searchByTitleAndDirector(String query);
 
     void deleteById(Integer id);
 

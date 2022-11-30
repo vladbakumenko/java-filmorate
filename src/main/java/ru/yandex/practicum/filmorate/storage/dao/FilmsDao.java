@@ -173,29 +173,28 @@ public class FilmsDao implements FilmStorage {
     }
 
     @Override
-    public List<Film> searchFilms(String query, String groupBy) {
-        String sql;
-        switch (groupBy) {
-            case "title":
-                sql = "select * from films as f where locate(?, lower(name)) > 0";
-                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
-            case "director":
-                sql = "select * from films as f, film_directors as fd, directors as d " +
-                        "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
-                return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
-            case "director,title":
-            case "title,director":
-                sql = "select * from films as f, film_directors as fd, directors as d " +
-                        "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
-                List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase(), query.toLowerCase());
-                HashSet<Film> uniqueList = new HashSet<>(ans);
-                ans = new ArrayList<>();
-                ans.addAll(uniqueList);
-                Collections.reverse(ans);
-                return ans;
-            default:
-                throw new BadRequestException("Incorrect parameters value");
-        }
+    public List<Film> searchByTitle(String query) {
+        String sql = "select * from films as f where locate(?, lower(name)) > 0";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String sql = "select * from films as f, film_directors as fd, directors as d " +
+                "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
+    }
+
+    @Override
+    public List<Film> searchByTitleAndDirector(String query) {
+        String sql = "select * from films as f, film_directors as fd, directors as d " +
+                "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
+        List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase(), query.toLowerCase());
+        HashSet<Film> uniqueList = new HashSet<>(ans);
+        ans = new ArrayList<>();
+        ans.addAll(uniqueList);
+        Collections.reverse(ans);
+        return ans;
     }
 
     @Override

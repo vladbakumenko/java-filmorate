@@ -11,8 +11,7 @@ import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static ru.yandex.practicum.filmorate.model.enums.EventType.LIKE;
 import static ru.yandex.practicum.filmorate.model.enums.Operation.ADD;
@@ -91,7 +90,17 @@ public class FilmService {
     }
 
     public List<Film> search(String query, String groupBy) {
-        return filmStorage.searchFilms(query, groupBy);
+        switch (groupBy) {
+            case "title":
+                return filmStorage.searchByTitle(query);
+            case "director":
+                return filmStorage.searchByDirector(query);
+            case "director,title":
+            case "title,director":
+                return filmStorage.searchByTitleAndDirector(query);
+            default:
+                throw new BadRequestException("Incorrect parameters value");
+        }
     }
 
     public void deleteById(Integer id) {

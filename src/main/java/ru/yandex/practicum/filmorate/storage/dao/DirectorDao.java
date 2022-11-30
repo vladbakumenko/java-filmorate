@@ -39,13 +39,12 @@ public class DirectorDao implements DirectorStorage {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, directorRowMapper, id));
         } catch (DataAccessException e) {
-            log.error("No record found in database for Director with id: " + id, e);
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     @Override
-    public Optional<Director> add(Director director) {
+    public Director add(Director director) {
         String sql = "INSERT INTO directors(name) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -56,18 +55,19 @@ public class DirectorDao implements DirectorStorage {
         }, keyHolder);
 
         int id = requireNonNull(keyHolder.getKey()).intValue();
+        director.setId(id);
 
-        return findById(id);
+        return director;
     }
 
     @Override
-    public Optional<Director> update(Director director) {
+    public Director update(Director director) {
         String sql = "UPDATE directors SET name = ? WHERE id = ?";
         int directorId = director.getId();
 
         jdbcTemplate.update(sql, director.getName(), directorId);
 
-        return findById(directorId);
+        return director;
     }
 
     @Override

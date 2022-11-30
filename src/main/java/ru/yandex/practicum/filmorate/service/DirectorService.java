@@ -32,23 +32,13 @@ public class DirectorService {
     }
 
     public Director add(Director director) {
-        Optional<Director> optionalDirector = directorStorage.add(director);
-
-        if (optionalDirector.isEmpty()) {
-            throw new NotFoundException("Director was not added.");
-        }
-        return optionalDirector.get();
+        return directorStorage.add(director);
     }
 
     public Director update(Director director) {
         getById(director.getId());
 
-        Optional<Director> optionalDirector = directorStorage.update(director);
-
-        if (optionalDirector.isEmpty()) {
-            throw new NotFoundException(format("Director with id: %d was not updated.", director.getId()));
-        }
-        return optionalDirector.get();
+        return directorStorage.update(director);
     }
 
     public void delete(Integer id) {

@@ -6,18 +6,21 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import static java.lang.String.format;
 import static ru.yandex.practicum.filmorate.model.enums.EventType.LIKE;
 import static ru.yandex.practicum.filmorate.model.enums.Operation.ADD;
 import static ru.yandex.practicum.filmorate.model.enums.Operation.REMOVE;
-
-import static java.lang.String.format;
 
 @Slf4j
 @Service
@@ -30,9 +33,26 @@ public class FilmService {
     private final FeedService feedService;
     private final DirectorService directorService;
     private final UserService userService;
+    private final GenreService genreService;
 
     public List<Film> findAll() {
-        return filmStorage.findAll();
+        List<Film> films = filmStorage.findAll();
+
+        Map<Integer, Genre> map = genreService.getMapOfFilmsIdAndGenres();
+
+        for (Film film : films) {
+            int filmId = film.getId();
+            List<Genre> genres = new ArrayList<>();
+
+            for (Integer id : map.keySet()) {
+                if (id == filmId) {
+                    genres.add(map.get(id));
+                }
+            }
+            film.setGenres(genres);
+        }
+
+        return films;
     }
 
     public Film create(Film film) {

@@ -36,13 +36,17 @@ public class ReviewService {
     public Review update(Review review) {
         throwIfReviewNotValid(review);
 
-        Review rw = reviewDao.findById(review.getReviewId()).orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+        Review rw = reviewDao.findById(review.getReviewId())
+                .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+
         feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, UPDATE);
         return reviewDao.update(review);
     }
 
     public void delete(Integer id) {
-        Review rw = reviewDao.findById(id).orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+        Review rw = reviewDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+
         reviewDao.delete(id);
 
         feedService.add(rw.getReviewId(), rw.getUserId(), REVIEW, REMOVE);
@@ -66,7 +70,9 @@ public class ReviewService {
 
     public Review findById(Integer id) {
         log.info("Получение отзыва с id {}", id);
-        return reviewDao.findById(id).orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+
+        return reviewDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
     }
 
     public void throwIfReviewNotValid(Review review) {

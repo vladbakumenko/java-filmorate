@@ -47,13 +47,8 @@ public class FilmService {
     }
 
     public Film getById(Integer id) {
-        Optional<Film> optionalFilm = filmStorage.findById(id);
-
-        if (optionalFilm.isEmpty()) {
-            throw new NotFoundException(String.format("Film with id: %d not found", id));
-        }
-
-        return optionalFilm.get();
+        return filmStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Film with id: %d not found", id)));
     }
 
 

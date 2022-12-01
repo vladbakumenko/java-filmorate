@@ -16,7 +16,7 @@ public class MpaDao {
     private final JdbcTemplate jdbcTemplate;
 
     public Optional<Mpa> findMpaById(int idMPA) {
-        String sql = "select id, name, description from mpa where id = ?";
+        String sql = "SELECT id, name, description FROM mpa WHERE id = ?";
 
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Mpa(rs.getInt("id"),
@@ -28,7 +28,7 @@ public class MpaDao {
     }
 
     public List<Mpa> findAll() {
-        String sql = "select * from mpa";
+        String sql = "SELECT * FROM mpa";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(rs.getInt("id"),
                 rs.getString("name"),

@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -174,21 +173,21 @@ public class FilmsDao implements FilmStorage {
 
     @Override
     public List<Film> searchByTitle(String query) {
-        String sql = "select * from films as f where locate(?, lower(name)) > 0";
+        String sql = "SELECT * FROM films AS f WHERE locate(?, lower(name)) > 0";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
     }
 
     @Override
     public List<Film> searchByDirector(String query) {
-        String sql = "select * from films as f, film_directors as fd, directors as d " +
-                "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
+        String sql = "SELECT * FROM films AS f, film_directors AS fd, directors AS d " +
+                "WHERE f.id = fd.film_id AND fd.director_id = d.id AND locate(?, lower(d.name)) > 0";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase());
     }
 
     @Override
     public List<Film> searchByTitleAndDirector(String query) {
-        String sql = "select * from films as f, film_directors as fd, directors as d " +
-                "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
+        String sql = "SELECT * FROM films AS f, film_directors AS fd, directors AS d " +
+                "WHERE (locate(?, lower(f.name)) > 0 OR (f.id = fd.film_id AND fd.director_id = d.id AND locate(?, lower(d.name)) > 0))";
         List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), query.toLowerCase(), query.toLowerCase());
         HashSet<Film> uniqueList = new HashSet<>(ans);
         ans = new ArrayList<>();
@@ -200,7 +199,7 @@ public class FilmsDao implements FilmStorage {
     @Override
     public void deleteById(Integer id) {
         log.info("Request to delete film with id: {}", id);
-        String sql = "DELETE FROM films where id = ?";
+        String sql = "DELETE FROM films WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }
 

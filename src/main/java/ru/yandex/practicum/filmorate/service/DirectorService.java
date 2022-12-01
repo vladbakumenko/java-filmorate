@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -23,12 +22,8 @@ public class DirectorService {
     }
 
     public Director getById(Integer id) {
-        Optional<Director> director = directorStorage.findById(id);
-
-        if (director.isEmpty()) {
-            throw new NotFoundException(format("Director with id: %d not found in DB", id));
-        }
-        return director.get();
+        return directorStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException(format("Director with id: %d not found in DB", id)));
     }
 
     public Director add(Director director) {

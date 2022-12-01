@@ -247,19 +247,9 @@ public class FilmsDao implements FilmStorage {
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
-        LocalDate releaseDate =
-                rs.getDate("releaseDate") == null ?
-                        null : rs.getDate("releaseDate").toLocalDate();
-        return Film.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .releaseDate(releaseDate)
-                .duration(rs.getInt("duration"))
-                .mpa(mpaService.getById(rs.getInt("mpa")))
-                .genres(getGenresByFilmId(rs.getInt("id")))
-                .directors(getDirectorsByFilmId(rs.getInt("id")))
-                .build();
+        Film film = makeFilmWithoutGenres(rs);
+        film.setGenres(getGenresByFilmId(rs.getInt("id")));
+        return film;
     }
 
     private Film makeFilmWithoutGenres(ResultSet rs) throws SQLException {

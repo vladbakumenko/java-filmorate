@@ -61,12 +61,18 @@ public class ReviewDao implements ReviewStorage {
     public List<Review> findAll(Integer filmId, Integer count) {
         if (filmId != null) {
             String sql = "SELECT * FROM reviews WHERE id_film = ? ORDER BY useful DESC ";
-            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper, filmId).stream().limit(count).collect(Collectors.toList());
+            List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper, filmId)
+                    .stream()
+                    .limit(count)
+                    .collect(Collectors.toList());
             return reviews;
         } else {
             String sql = "SELECT * FROM reviews ORDER BY useful DESC ";
             List<Review> reviews = jdbcTemplate.query(sql, reviewRowMapper);
-            return reviews.stream().limit(count).collect(Collectors.toList());
+            return reviews
+                    .stream()
+                    .limit(count)
+                    .collect(Collectors.toList());
         }
     }
 

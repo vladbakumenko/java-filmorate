@@ -209,7 +209,7 @@ public class FilmoRateApplicationTests {
 
     @Test
     public void testFindAllFilms() {
-        Collection<Film> films = filmStorage.findAll();
+        Collection<Film> films = filmService.findAll();
 
         assertEquals(1, films.size());
         assertTrue(films.contains(film));

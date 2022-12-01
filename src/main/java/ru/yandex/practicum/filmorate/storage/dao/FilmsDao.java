@@ -43,7 +43,7 @@ public class FilmsDao implements FilmStorage {
     public List<Film> findAll() {
         String sql = "SELECT * FROM films";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmWithoutGenres(rs));
     }
 
     @Override
@@ -258,6 +258,21 @@ public class FilmsDao implements FilmStorage {
                 .duration(rs.getInt("duration"))
                 .mpa(mpaService.getById(rs.getInt("mpa")))
                 .genres(getGenresByFilmId(rs.getInt("id")))
+                .directors(getDirectorsByFilmId(rs.getInt("id")))
+                .build();
+    }
+
+    private Film makeFilmWithoutGenres(ResultSet rs) throws SQLException {
+        LocalDate releaseDate =
+                rs.getDate("releaseDate") == null ?
+                        null : rs.getDate("releaseDate").toLocalDate();
+        return Film.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .releaseDate(releaseDate)
+                .duration(rs.getInt("duration"))
+                .mpa(mpaService.getById(rs.getInt("mpa")))
                 .directors(getDirectorsByFilmId(rs.getInt("id")))
                 .build();
     }

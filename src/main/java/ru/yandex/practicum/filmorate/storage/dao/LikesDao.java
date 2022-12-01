@@ -26,7 +26,7 @@ public class LikesDao {
         filmStorage.findById(idFilm);
         removeLike(idFilm, idUser);
 
-        String sql = "insert into likes_by_users(id_film, id_user) values (?, ?)";
+        String sql = "INSERT INTO likes_by_users(id_film, id_user) VALUES (?, ?)";
         jdbcTemplate.update(sql, idFilm, idUser);
         log.info("Like added for film with id: {} from user with id: {}", idFilm, idUser);
     }
@@ -34,15 +34,15 @@ public class LikesDao {
     public void removeLike(Integer idFilm, Integer idUser) {
         filmStorage.findById(idFilm);
 
-        String sql = "delete from likes_by_users where id_film = ? and id_user = ?";
+        String sql = "DELETE FROM likes_by_users WHERE id_film = ? AND id_user = ?";
         jdbcTemplate.update(sql, idFilm, idUser);
         log.info("Like removed for film with id: {} from user with id: {}", idFilm, idUser);
     }
 
     public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
-        final String sqlQuery = "select * from films f "
-                + "left join (select id_film, count(*) likes_count from likes_by_users group by id_film) l on f.id = l.id_film "
-                + "order by l.likes_count desc limit ?";
+        final String sqlQuery = "SELECT * FROM films f "
+                + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l ON f.id = l.id_film "
+                + "ORDER BY l.likes_count DESC LIMIT ?";
 
         var stream = jdbcTemplate
                 .query(sqlQuery, (rs, rowNum) -> filmStorage.findById(rs.getInt("id")), count)

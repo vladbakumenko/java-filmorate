@@ -21,7 +21,7 @@ public class FeedDao implements FeedStorage {
     @Override
     public List<Feed> findByUserId(int id) {
 
-        String sql = "select * from feed where id_user = ? order by timestamp asc";
+        String sql = "SELECT * FROM feed WHERE id_user = ? ORDER BY timestamp ASC";
 
         return jdbcTemplate.query(sql, feedRowMapper, id);
     }
@@ -29,8 +29,8 @@ public class FeedDao implements FeedStorage {
     @Override
     public void addFeed(int idEntity, int idUser, long timestamp, EventType eventType, Operation operation) {
 
-        String sql = "insert into feed(id_entity, id_user, timestamp, event_type, operation) " +
-                "values (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO feed(id_entity, id_user, timestamp, event_type, operation) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sql, idEntity, idUser, timestamp,
                 eventType.toString(), operation.toString());

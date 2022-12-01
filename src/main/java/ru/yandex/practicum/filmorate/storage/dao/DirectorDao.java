@@ -72,9 +72,6 @@ public class DirectorDao implements DirectorStorage {
 
     @Override
     public void delete(Integer id) {
-        String sqlQuery = "DELETE FROM film_directors WHERE director_id = ?";
-        jdbcTemplate.update(sqlQuery, id);
-
         String sql = "DELETE FROM directors WHERE id = ?";
         jdbcTemplate.update(sql, id);
     }

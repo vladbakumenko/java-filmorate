@@ -6,15 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDao;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -38,21 +35,7 @@ public class FilmService {
     public List<Film> findAll() {
         List<Film> films = filmStorage.findAll();
 
-        Map<Integer, Genre> map = genreService.getMapOfFilmsIdAndGenres();
-
-        for (Film film : films) {
-            int filmId = film.getId();
-            List<Genre> genres = new ArrayList<>();
-
-            for (Integer id : map.keySet()) {
-                if (id == filmId) {
-                    genres.add(map.get(id));
-                }
-            }
-            film.setGenres(genres);
-        }
-
-        return films;
+        return genreService.saveGenresForFilms(films);
     }
 
     public Film create(Film film) {

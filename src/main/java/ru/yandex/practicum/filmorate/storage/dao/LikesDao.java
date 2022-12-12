@@ -1,69 +1,94 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class LikesDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
-
-    @Autowired
-    public LikesDao(JdbcTemplate jdbcTemplate, FilmStorage filmStorage, UserStorage userStorage) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
 
     public void addLike(Integer idFilm, Integer idUser) {
-        filmStorage.getById(idFilm);
-        userStorage.checkUserExist(idUser);
+        filmStorage.findById(idFilm);
+        removeLike(idFilm, idUser);
 
-        String sql = "insert into likes_by_users(id_film, id_user) values (?, ?)";
+        String sql = "INSERT INTO likes_by_users(id_film, id_user) VALUES (?, ?)";
         jdbcTemplate.update(sql, idFilm, idUser);
         log.info("Like added for film with id: {} from user with id: {}", idFilm, idUser);
     }
 
     public void removeLike(Integer idFilm, Integer idUser) {
-        filmStorage.getById(idFilm);
-        userStorage.checkUserExist(idUser);
+        filmStorage.findById(idFilm);
 
-        String sql = "delete from likes_by_users where id_film = ? and id_user = ?";
+        String sql = "DELETE FROM likes_by_users WHERE id_film = ? AND id_user = ?";
         jdbcTemplate.update(sql, idFilm, idUser);
         log.info("Like removed for film with id: {} from user with id: {}", idFilm, idUser);
     }
 
-    public Collection<Film> getPopular(Integer count) {
+    public List<Film> getPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+        final String sqlQuery = "SELECT * FROM films f "
+                + "LEFT JOIN (SELECT id_film, count(*) likes_count FROM likes_by_users GROUP BY id_film) l ON f.id = l.id_film "
+                + "ORDER BY l.likes_count DESC LIMIT ?";
 
-        String sql = "select f.id from films as f join likes_by_users as l on f.id = l.id_film " +
-                "group by f.id order by count(l.id_user) desc limit ?";
+        var stream = jdbcTemplate
+                .query(sqlQuery, (rs, rowNum) -> filmStorage.findById(rs.getInt("id")), count)
+                .stream()
+                .map(film -> filmStorage.findById(film.orElseThrow().getId()));
 
-        Collection<Film> sortedFilmsByLikes = new LinkedList<>(jdbcTemplate.query(sql,
-                (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), count));
-
-        Collection<Film> filmsWithoutLikes = new ArrayList<>();
-
-        if (sortedFilmsByLikes.size() == 0 || sortedFilmsByLikes.size() < count) {
-            int limit = count - sortedFilmsByLikes.size();
-            String sql2 = "select id from films where id not in " +
-                    "(select id_film from likes_by_users group by id_film) limit ?";
-            filmsWithoutLikes.addAll(jdbcTemplate.query(sql2,
-                    (rs, rowNum) -> filmStorage.getById(rs.getInt("id")), limit));
+        if (year.isPresent()) {
+            stream = stream.filter(film -> film.orElseThrow().getReleaseDate().getYear() == year.get());
         }
-        sortedFilmsByLikes.addAll(filmsWithoutLikes);
+        if (genreId.isPresent()) {
+            stream = stream.filter(film -> film.orElseThrow().getGenres()
+                    .stream().anyMatch(genre -> genre.getId() == genreId.get()));
+        }
 
-        return sortedFilmsByLikes;
+        return stream.map(Optional::orElseThrow).collect(toList());
+    }
+
+    public List<Film> getRecommendedFilm(Integer idUser, Integer recommendedIdUser) {
+        log.info("Request to get recommended film from user with id: {}", idUser);
+        String sql2 = "SELECT * FROM films AS f " +
+                "   JOIN mpa AS m ON f.mpa = m.id " +
+                "   WHERE f.id IN (SELECT id_film FROM likes_by_users WHERE id_user = ? AND " +
+                "   id_film NOT IN (SELECT id_film FROM likes_by_users WHERE id_user = ?))";
+        try {
+            return new ArrayList<>(jdbcTemplate.query(sql2,
+                    (rs, rowNum) -> filmStorage.findById(rs.getInt("id")).orElseThrow(),
+                    recommendedIdUser, idUser));
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("No record found in database for " + recommendedIdUser, e);
+            return null;
+        }
+    }
+
+    public Integer getUsersWithMaximumIntersectionLikes(Integer idUser) {
+        log.info("Request to get user with maximum intersection likes from user with id: {}", idUser);
+        String sql = "SELECT l2.id_user AS recommended" +
+                "   FROM likes_by_users l1 JOIN likes_by_users l2 " +
+                "   ON l1.id_film = l2.id_film " +
+                "   WHERE l1.id_user = ? AND l1.id_user <> l2.id_user" +
+                "   GROUP BY l1.id_user, l2.id_user" +
+                "   ORDER BY COUNT(*) DESC LIMIT 1";
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, idUser);
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("No record found in database for " + idUser, e);
+            return idUser;
+        }
     }
 }

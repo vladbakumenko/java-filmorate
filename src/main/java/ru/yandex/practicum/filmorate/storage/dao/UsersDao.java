@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -14,30 +15,27 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class UsersDao implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UsersDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     @Override
-    public Collection<User> findAll() {
-        String sql = "select * from users";
+    public List<User> findAll() {
+        String sql = "SELECT * FROM users";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs));
     }
 
     @Override
     public User create(User user) {
-        String sql = "insert into users(email, login, name, birthday) " +
-                "values (?, ?, ?, ?)";
+        String sql = "INSERT INTO users(email, login, name, birthday) " +
+                "VALUES (?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -57,9 +55,7 @@ public class UsersDao implements UserStorage {
 
     @Override
     public User update(User user) {
-        checkUserExist(user.getId());
-
-        String sql = "update users set email = ?, login = ?, name = ?, birthday = ? where id = ?";
+        String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
 
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(),
                 user.getBirthday(), user.getId());
@@ -68,25 +64,28 @@ public class UsersDao implements UserStorage {
     }
 
     @Override
-    public User getById(Integer id) {
-        String sql = "select * from users where id = ?";
+    public User findById(Integer id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
 
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeUser(rs), id);
         } catch (DataAccessException e) {
-            throw new UserNotFoundException(String.format("User with id: %d not found in DB", id));
+            throw new NotFoundException(String.format("User with id: %d not found in DB", id));
         }
     }
 
     @Override
-    public void checkUserExist(Integer id) {
-        String sql = "select exists (select * from users where id = ?)";
+    public Boolean checkUserExist(Integer id) {
+        String sql = "SELECT exists (SELECT * FROM users WHERE id = ?)";
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
+        return jdbcTemplate.queryForObject(sql, Boolean.class, id);
+    }
 
-        if (!exists) {
-            throw new UserNotFoundException(String.format("User with id: %d not found in DB", id));
-        }
+    @Override
+    public void deleteById(Integer id) {
+        log.info("Request to delete user with id: {}", id);
+        String sql = "DELETE FROM users where id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     public User makeUser(ResultSet rs) throws SQLException {

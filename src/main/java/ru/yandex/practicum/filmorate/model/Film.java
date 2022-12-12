@@ -7,7 +7,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
@@ -19,6 +18,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private MPA mpa;
+    private Mpa mpa;
     private List<Genre> genres;
+    private List<Director> directors;
 }
